@@ -7,6 +7,8 @@ import guli.gulix.backend.dto.ErrorResponseDTO;
 import guli.gulix.backend.dto.ValidationErrorResponseDTO;
 import guli.gulix.backend.service.EmpresaService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,28 +35,25 @@ public class EmpresaController {
             @ApiResponse(
                     responseCode = "200",
                     description = "Empresa encontrada.",
-                    content = @io.swagger.v3.oas.annotations.media.Content(
-                            schema = @io.swagger.v3.oas.annotations.media.Schema(
-                                    implementation = EmpresaResponseDTO.class
-                            )
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = EmpresaResponseDTO.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "Empresa não encontrada.",
-                    content = @io.swagger.v3.oas.annotations.media.Content(
-                            schema = @io.swagger.v3.oas.annotations.media.Schema(
-                                    implementation = ErrorResponseDTO.class
-                            )
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "500",
                     description = "Erro interno do servidor.",
-                    content = @io.swagger.v3.oas.annotations.media.Content(
-                            schema = @io.swagger.v3.oas.annotations.media.Schema(
-                                    implementation = ErrorResponseDTO.class
-                            )
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
                     )
             )
     })
@@ -74,55 +73,49 @@ public class EmpresaController {
             @ApiResponse(
                     responseCode = "200",
                     description = "Empresa atualizada com sucesso.",
-                    content = @io.swagger.v3.oas.annotations.media.Content(
-                            schema = @io.swagger.v3.oas.annotations.media.Schema(
-                                    implementation = EmpresaResponseDTO.class
-                            )
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = EmpresaResponseDTO.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "400",
                     description = "Dados de atualização inválidos.",
-                    content = @io.swagger.v3.oas.annotations.media.Content(
-                            schema = @io.swagger.v3.oas.annotations.media.Schema(
-                                    implementation = ValidationErrorResponseDTO.class
-                            )
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ValidationErrorResponseDTO.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "401",
                     description = "Usuário não autenticado.",
-                    content = @io.swagger.v3.oas.annotations.media.Content(
-                            schema = @io.swagger.v3.oas.annotations.media.Schema(
-                                    implementation = ErrorResponseDTO.class
-                            )
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "Usuário não possui permissão para atualizar a empresa.",
-                    content = @io.swagger.v3.oas.annotations.media.Content(
-                            schema = @io.swagger.v3.oas.annotations.media.Schema(
-                                    implementation = ErrorResponseDTO.class
-                            )
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "Empresa não encontrada.",
-                    content = @io.swagger.v3.oas.annotations.media.Content(
-                            schema = @io.swagger.v3.oas.annotations.media.Schema(
-                                    implementation = ErrorResponseDTO.class
-                            )
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "500",
                     description = "Erro interno do servidor.",
-                    content = @io.swagger.v3.oas.annotations.media.Content(
-                            schema = @io.swagger.v3.oas.annotations.media.Schema(
-                                    implementation = ErrorResponseDTO.class
-                            )
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
                     )
             )
     })
