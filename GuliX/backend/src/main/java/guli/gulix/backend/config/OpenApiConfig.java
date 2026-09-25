@@ -2,7 +2,9 @@ package guli.gulix.backend.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,12 +12,21 @@ import org.springframework.context.annotation.Configuration;
 @OpenAPIDefinition(
         info = @Info(
                 title = "GuliX API",
-                version = "1.0",
-                description = "API do E-commerce GuliX"
+                version = "1.0.0",
+                description = "API REST para gerenciamento de um e-commerce de hardwares.",
+                contact = @Contact(
+                        name = "GuliX",
+                        url = "https://github.com/gulinagai/Gulix"
+                ),
+                license = @License(
+                        name = "MIT License",
+                        url = "https://opensource.org/license/mit"
+                )
         )
 )
 @SecurityScheme(
         name = "bearerAuth",
+        description = "Autenticação utilizando token JWT.",
         type = SecuritySchemeType.HTTP,
         scheme = "bearer",
         bearerFormat = "JWT"

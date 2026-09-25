@@ -3,20 +3,61 @@ package guli.gulix.backend.controller;
 
 import guli.gulix.backend.dto.EmpresaResponseDTO;
 import guli.gulix.backend.dto.EmpresaUpdateDTO;
+import guli.gulix.backend.dto.ErrorResponseDTO;
+import guli.gulix.backend.dto.ValidationErrorResponseDTO;
 import guli.gulix.backend.service.EmpresaService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/empresas")
+@Tag( name = "Empresas", description = "Operações relacionadas ao gerenciamento da empresa." )
 public class EmpresaController {
 
     private final EmpresaService empresaService;
 
+    @Operation(
+            summary = "Consultar empresa",
+            description = "Retorna os dados da empresa atualmente cadastrada no sistema."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Empresa encontrada.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = EmpresaResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Empresa não encontrada.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Erro interno do servidor.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
     @GetMapping
     ResponseEntity<EmpresaResponseDTO> getEmpresa() {
 
@@ -24,10 +65,81 @@ public class EmpresaController {
     }
 
 
-    @PatchMapping("/{empresaId}")
+
+    @Operation(
+            summary = "Atualizar empresa",
+            description = "Atualiza os dados da empresa atualmente cadastrada no sistema. Somente os campos informados serão alterados."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Empresa atualizada com sucesso.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = EmpresaResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Dados de atualização inválidos.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ValidationErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário não possui permissão para atualizar a empresa.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Empresa não encontrada.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Erro interno do servidor.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping
     ResponseEntity<EmpresaResponseDTO> updateEmpresa(@Valid @RequestBody EmpresaUpdateDTO dto) {
 
         return ResponseEntity.ok().body(empresaService.updateEmpresa(dto));
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
