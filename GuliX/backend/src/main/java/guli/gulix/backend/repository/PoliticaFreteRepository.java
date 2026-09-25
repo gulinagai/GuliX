@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface PoliticaFreteRepository extends JpaRepository<PoliticaFrete, Integer> {
 
-    Optional<PoliticaFrete> findByEstadoSigla(String sigla);
+    Optional<PoliticaFrete> findByEstadoSiglaAndAtivoTrue(String sigla);
 
+    Optional<PoliticaFrete> findByEstadoIdAndAtivoTrue(Integer estadoId);
 }
