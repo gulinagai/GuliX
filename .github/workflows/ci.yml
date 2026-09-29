@@ -25,4 +25,5 @@ jobs:
           cache: maven
 
       - name: Build and test
+        working-directory: GuliX/backend
         run: ./mvnw clean verify
