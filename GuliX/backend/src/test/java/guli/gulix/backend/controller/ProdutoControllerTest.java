@@ -33,31 +33,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ProdutoController.class) // sobe um contexto de teste focado na camada MVC
 class ProdutoControllerTest {
 
-// para esse teste, será considerado:
+/** Para esse teste, será considerado:
 
-//    Spring MVC real;
-//    ProdutoController real;
-//    ProdutoService mock;
+    Spring MVC real;
+    ProdutoController real;
+    ProdutoService mock;
 
-// O foco deste teste não é validar autenticação ou autorização.
-//
-// Foco:
-// - binding de @RequestBody e @PathVariable
-// - validações
-// - status HTTP
-// - headers
-// - serialização JSON
-// - interação com o Service, que é mockado
-//
-// Nos endpoints protegidos, @WithMockUser é usado apenas
-// para fornecer uma autenticação que permita alcançar o Controller.
+ O foco deste teste não é validar autenticação ou autorização.
 
-//    status().isOk()          // 200 OK
-//    status().isCreated()     // 201 Created
-//    status().isNoContent()   // 204 No Content
-//    status().isBadRequest()  // 400 Bad Request
-//    status().isNotFound()    // 404 Not Found
+ Foco:
+ - binding de @RequestBody e @PathVariable
+ - validações
+ - status HTTP
+ - headers
+ - serialização JSON
+ - interação com o Service, que é mockado
 
+ Nos endpoints protegidos, @WithMockUser é usado apenas
+ para fornecer uma autenticação que permita alcançar o Controller.
+
+    status().isOk()          // 200 OK
+    status().isCreated()     // 201 Created
+    status().isNoContent()   // 204 No Content
+    status().isBadRequest()  // 400 Bad Request
+    status().isNotFound()    // 404 Not Found
+**/
 
     @Autowired
     private MockMvc mockMvc;
