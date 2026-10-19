@@ -14,24 +14,24 @@ public class MarcaFixture {
         Marca marca = new Marca();
 
         marca.setId(1);
-        marca.setNome("Gabinete");
+        marca.setNome("AMD");
 
         return marca;
     }
 
-    public static MarcaRequestDTO categoriaRequestDTO() {
+    public static MarcaRequestDTO marcaRequestDTO() {
         MarcaRequestDTO marcaRequestDTO = new MarcaRequestDTO();
 
-        marcaRequestDTO.setNome("Gabinete");
+        marcaRequestDTO.setNome("AMD");
 
         return marcaRequestDTO;
     }
 
-    public static MarcaResponseDTO categoriaResponseDTO() {
+    public static MarcaResponseDTO marcaResponseDTO() {
         MarcaResponseDTO marcaResponseDTO = new MarcaResponseDTO();
 
         marcaResponseDTO.setId(1);
-        marcaResponseDTO.setNome("Gabinete");
+        marcaResponseDTO.setNome("AMD");
 
         return marcaResponseDTO;
     }
