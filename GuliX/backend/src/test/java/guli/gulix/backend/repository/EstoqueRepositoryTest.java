@@ -45,7 +45,6 @@ class EstoqueRepositoryTest {
     private ProdutoRepository produtoRepository;
 
     @Test
-    @DisplayName("Deve encontrar estoque pelo ID do produto")
     void findByProdutoId_deveRetornarEstoqueQuandoProdutoPossuiEstoque() {
         Produto produto = criarProduto("Produto com estoque");
         Estoque estoque = new Estoque(null, produto, 20, 5);
@@ -60,7 +59,6 @@ class EstoqueRepositoryTest {
     }
 
     @Test
-    @DisplayName("Deve retornar vazio quando o produto não possui estoque")
     void findByProdutoId_deveRetornarVazioQuandoNaoExisteEstoqueParaProduto() {
         Produto produto = criarProduto("Produto sem estoque");
 
