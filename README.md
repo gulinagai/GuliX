@@ -1,4 +1,4 @@
-GuliX — API de E-commerce de Hardware
+🖥️ GuliX — API de E-commerce de Hardware
 
 <p align="center">
   <strong>API REST para gerenciamento de um e-commerce de hardware</strong><br>
@@ -16,6 +16,36 @@ GuliX — API de E-commerce de Hardware
 O GuliX é uma API REST para um e-commerce de hardware, desenvolvida com Java e Spring Boot. A aplicação contempla os principais fluxos de uma loja virtual, incluindo autenticação e autorização, catálogo de produtos, carrinho, pedidos, pagamentos, controle de estoque, endereços e cálculo de frete.
 
 A solução foi estruturada com separação de responsabilidades, regras de negócio organizadas em serviços, persistência relacional, documentação interativa, testes automatizados e integração contínua. O objetivo é demonstrar a construção de um backend organizado, com atenção a segurança, manutenibilidade e integração com serviços externos.
+
+DER - Diagrama Entidade-Relacionamento
+
+![DER_GuliX.png](GuliX/docs/DER_GuliX.png)
+
+Visão geral
+
+Domínio
+
+Recursos principais
+
+Acesso
+
+Autenticação JWT, refresh tokens e autorização
+
+E-commerce
+
+Produtos, categorias, marcas, carrinho e pedidos
+
+Operação
+
+Estoque, endereços, empresas e filiais
+
+Financeiro e logística
+
+Stripe, políticas de frete e OpenRouteService
+
+Engenharia
+
+API documentada, testes automatizados, Docker e CI
 
 Índice
 
@@ -69,7 +99,7 @@ Senhas armazenadas com hash, sem persistir senhas em texto puro.
 
 Endpoints de consulta, atualização e exclusão de usuários.
 
-Catálogo de produtos
+🛒 Catálogo de produtos
 
 Operações de consulta e manutenção de produtos.
 
@@ -221,36 +251,6 @@ Config / Security: reúne configurações da aplicação, integrações, autenti
 
 Tratamento de erros: centraliza a conversão de falhas em respostas consistentes.
 
-Estrutura simplificada do repositório:
-
-projeto-GuliX/
-├── .github/
-│   └── workflows/
-│       └── ci.yml
-├── GuliX/
-│   ├── backend/
-│   │   ├── src/
-│   │   │   ├── main/java/guli/gulix/backend/
-│   │   │   │   ├── config/
-│   │   │   │   ├── controller/
-│   │   │   │   ├── dto/
-│   │   │   │   ├── entity/
-│   │   │   │   ├── exception/
-│   │   │   │   ├── repository/
-│   │   │   │   ├── security/
-│   │   │   │   └── service/
-│   │   │   └── test/java/
-│   │   ├── Dockerfile
-│   │   ├── docker-compose.yml
-│   │   ├── .env.example
-│   │   ├── pom.xml
-│   │   └── mvnw
-│   └── docs/
-│       ├── business-rules.md
-│       └── der-gulix.png
-└── README.md
-
-A árvore acima é uma visão resumida das áreas principais; alguns nomes de pacotes e arquivos podem variar conforme a evolução do código.
 
 Segurança
 
@@ -384,7 +384,7 @@ No Windows, utilize:
 cd GuliX/backend
 .\mvnw.cmd spring-boot:run
 
-O Spring configura spring.jpa.hibernate.ddl-auto=update no perfil atual. Para ambientes de produção, recomenda-se substituir a atualização automática do esquema por migrações versionadas, por exemplo com Flyway ou Liquibase.
+Nota para ambientes de produção: o Spring configura spring.jpa.hibernate.ddl-auto=update no perfil atual. Para ambientes de produção, recomenda-se substituir a atualização automática do esquema por migrações versionadas, por exemplo com Flyway ou Liquibase.
 
 Documentação da API
 
