@@ -1,122 +1,454 @@
-# GuliX - E-commerce de Hardwares
+🖥️ GuliX — API de E-commerce de Hardware
+
+<p align="center">
+  <strong>API REST para gerenciamento de um e-commerce de hardware</strong><br>
+  Java • Spring Boot • Spring Security • JWT • MySQL • Docker
+</p>
+
+<p align="center">
+  <a href="https://github.com/gulinagai/projeto-GuliX/actions"><img alt="CI" src="https://github.com/gulinagai/projeto-GuliX/actions/workflows/ci.yml/badge.svg"></a>
+  <img alt="Java 25" src="https://img.shields.io/badge/Java-25-orange?logo=openjdk&logoColor=white">
+  <img alt="Spring Boot 4" src="https://img.shields.io/badge/Spring%20Boot-4.0.5-6DB33F?logo=springboot&logoColor=white">
+  <img alt="MySQL 8.4" src="https://img.shields.io/badge/MySQL-8.4-4479A1?logo=mysql&logoColor=white">
+  <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white">
+</p>
+
+O GuliX é uma API REST para um e-commerce de hardware, desenvolvida com Java e Spring Boot. A aplicação contempla os principais fluxos de uma loja virtual, incluindo autenticação e autorização, catálogo de produtos, carrinho, pedidos, pagamentos, controle de estoque, endereços e cálculo de frete.
+
+A solução foi estruturada com separação de responsabilidades, regras de negócio organizadas em serviços, persistência relacional, documentação interativa, testes automatizados e integração contínua. O objetivo é demonstrar a construção de um backend organizado, com atenção a segurança, manutenibilidade e integração com serviços externos.
+
+<strong>DER - Diagrama Entidade-Relacionamento</strong>
+
+![DER_GuliX.png](GuliX/docs/DER_GuliX.png)
+
+<strong>Visão geral</strong>
+
+<strong>Domínio</strong>
+
+<strong>Recursos principais</strong>
+
+Acesso
+
+Autenticação JWT, refresh tokens e autorização
+
+E-commerce
+
+Produtos, categorias, marcas, carrinho e pedidos
+
+Operação
+
+Estoque, endereços, empresas e filiais
+
+Financeiro e logística
+
+Stripe, políticas de frete e OpenRouteService
+
+Engenharia
+
+API documentada, testes automatizados, Docker e CI
+
+<strong>Índice</strong>
+
+Funcionalidades
+
+Tecnologias
+
+Arquitetura e organização
+
+Segurança
+
+Integrações externas
+
+Banco de dados
+
+Pré-requisitos
+
+Como executar com Docker
+
+Como executar localmente
+
+Documentação da API
+
+Testes e qualidade
+
+CI — Integração contínua
+
+Configuração e segurança de ambiente
+
+Regras de negócio
+
+Escopo e evolução
+
+Autor
+
+<strong>Funcionalidades</strong>
+
+<strong>Autenticação e usuários</strong>
+
+Cadastro e login de usuários.
+
+Autenticação baseada em JWT.
+
+Fluxo de renovação de tokens (refresh token).
+
+Logout e gerenciamento de sessão por tokens persistidos.
+
+Controle de acesso por permissões/roles.
+
+Senhas armazenadas com hash, sem persistir senhas em texto puro.
+
+Endpoints de consulta, atualização e exclusão de usuários.
+
+<strong>Catálogo de produtos</strong>
+
+Operações de consulta e manutenção de produtos.
+
+Categorias e marcas.
+
+Filtros de consulta e paginação com Spring Data JPA e Specification.
+
+Suporte a informações comerciais, como preço e descontos, conforme as regras de domínio.
+
+<strong>Carrinho e pedidos</strong>
+
+Consulta do carrinho.
+
+Inclusão, alteração de quantidade e remoção de itens.
+
+Criação e consulta de pedidos.
+
+Histórico de pedidos do usuário.
+
+Cancelamento de pedidos, sujeito às regras de negócio.
+
+Consulta administrativa e atualização de status do pedido.
+
+Persistência dos dados necessários ao pedido e ao endereço de entrega.
+
+<strong>Estoque</strong>
+
+Consulta de estoque por produto.
+
+Registro de entrada e saída.
+
+Atualização de inventário.
+
+Separação entre quantidade total e quantidade reservada, apoiando o controle de disponibilidade.
+
+<strong>Endereços e estrutura geográfica</strong>
+
+Cadastro e manutenção de endereços.
+
+Definição de endereço principal.
+
+Estados e cidades como cadastros próprios.
+
+Armazenamento de coordenadas geográficas para apoiar o cálculo de frete.
+
+Cadastro de empresas e filiais.
+
+<strong>Pagamentos e frete</strong>
+
+Integração de checkout com Stripe.
+
+Consulta de informações de pagamento.
+
+Regras para cálculo de descontos e parcelamento implementadas no domínio de pagamento.
+
+Cálculo de frete com base em política por estado, distância estimada e valor por quilômetro.
+
+Integração com OpenRouteService para obtenção de informações de rota/distância.
+
+Cadastro e consulta de políticas de frete.
+
+<strong>Tratamento de erros e validação</strong>
+
+Validação de dados de entrada com Jakarta Bean Validation.
+
+Tratamento centralizado de exceções.
+
+Respostas de erro padronizadas por meio de ErrorResponseDTO.
+
+Configuração de respostas de autenticação e autorização para requisições não autorizadas ou proibidas.
+
+<strong>Tecnologias</strong>
+
+<strong>Área</strong>
+
+<strong>Tecnologias</strong>
+
+Linguagem
+
+Java 25
+
+Framework
+
+Spring Boot 4.0.5, Spring MVC
+
+Persistência
+
+Spring Data JPA, Hibernate
+
+Banco de dados
+
+MySQL 8.4
+
+Segurança
+
+Spring Security, JWT (JJWT)
+
+Validação
+
+Spring Boot Validation / Jakarta Validation
+
+Mapeamento
+
+MapStruct, Lombok
+
+Documentação
+
+Springdoc OpenAPI, Swagger UI
+
+Pagamentos
+
+Stripe Java SDK
+
+Rotas e distância
+
+OpenRouteService
+
+Build
+
+Maven Wrapper
+
+Contêineres
+
+Docker, Docker Compose
+
+Testes
+
+JUnit, Spring Boot Test, Spring Security Test, H2, Testcontainers (dependências disponíveis)
+
+CI
+
+GitHub Actions
+
+<strong>Arquitetura e organização</strong>
+
+O backend segue uma organização em camadas para manter separadas as responsabilidades de entrada HTTP, regras de negócio e acesso a dados:
+
+Controller: recebe requisições REST e define os contratos HTTP.
+
+Service: concentra operações e regras de negócio.
+
+Repository: abstrai o acesso aos dados por meio do Spring Data JPA.
+
+Entity: representa o modelo persistido.
+
+DTO: define os dados de entrada e saída da API, evitando expor diretamente as entidades nos contratos públicos.
+
+Config / Security: reúne configurações da aplicação, integrações, autenticação e autorização.
+
+Tratamento de erros: centraliza a conversão de falhas em respostas consistentes.
+
+<strong>Segurança</strong>
+
+A API utiliza Spring Security e tokens JWT para proteger recursos e aplicar autorização. O projeto também define handlers específicos para falhas de autenticação e autorização e configura CORS.
+
+A implementação contempla a separação entre endpoints públicos e protegidos, validação de dados, armazenamento de senhas com hash, configuração de credenciais por variáveis de ambiente e respostas padronizadas para erros de autenticação e autorização.
+
+A execução em produção exige configuração própria do ambiente, incluindo HTTPS, segredos fortes, CORS restrito aos domínios autorizados, gestão de credenciais e políticas de operação adequadas. As credenciais de exemplo são destinadas exclusivamente ao desenvolvimento local.
+
+<strong>Integrações externas</strong>
+
+<strong>Stripe</strong>
+
+Responsável pelo fluxo de checkout/pagamento. Para executar os fluxos integrados, é necessário configurar a chave secreta e, quando aplicável, o segredo de webhook da sua conta Stripe. Use credenciais de teste durante o desenvolvimento.
+
+<strong>OpenRouteService</strong>
+
+Utilizado para obter dados de rota/distância que alimentam o cálculo de frete. É necessário configurar uma chave de API válida e considerar os limites de uso do serviço.
+
+Essas integrações dependem de credenciais externas e de conectividade; a execução local da aplicação não garante que os fluxos de pagamento ou roteamento funcionem sem essa configuração.
+
+<strong>Banco de dados</strong>
+
+O projeto utiliza MySQL e persiste os dados por meio de Spring Data JPA/Hibernate. O modelo contempla, entre outros, usuários, endereços, catálogo, categorias, marcas, carrinho, pedidos, pagamentos, estoque, empresas, filiais, estados, cidades e políticas de frete.
+
+<strong>Diagrama Entidade-Relacionamento</strong>
 
 
-API RESTful de e-commerce desenvolvida com Java + Spring Boot, simulando um sistema completo de loja de hardware.
 
-O projeto foi desenvolvido com foco em arquitetura backend, regras de negócio, autenticação segura, persistência de dados e modelagem relacional.
+As regras de negócio documentadas estão em GuliX/docs/business-rules.md.
 
+<strong>Pré-requisitos</strong>
 
-## Status
-- Backend concluído
+Para executar localmente:
 
-## Principais tecnologias utilizadas:
+Git.
 
-## Back-End:
-- Java
-- Spring MVC
-- Spring Security
-- Spring Data JPA
-- Hibernate
-- Lombok
-- Maven
-- JWT Authentication
+JDK 25.
 
-## Banco de dados:
-- MySQL
+Docker e Docker Compose (para a opção conteinerizada).
 
-# Autenticação e Autorização:
-- JWT/Spring Security
+Credenciais de teste do Stripe e chave do OpenRouteService para testar os fluxos que dependem desses serviços.
 
-## Principais Funcionalidades
+O Maven Wrapper (mvnw / mvnw.cmd) está incluído no repositório; não é necessário instalar o Maven separadamente.
 
-### Usuários e Segurança
-- Registro e login de usuários
-- Autenticação via JWT
-- Autorização baseada em roles
-- Criptografia de senha
+<strong>Como executar com Docker</strong>
 
-### Produtos
-- CRUD completo de produtos
-- Categorias
-- Marcas
-- Controle de estoque
-- Produtos em destaque
-- Sistema de descontos
+<strong>Clone o repositório</strong>
 
-### Carrinho
-- Adição e remoção de produtos
-- Controle de quantidade de itens
+git clone https://github.com/gulinagai/projeto-GuliX.git
+cd projeto-GuliX/GuliX/backend
 
-### Pedidos
-- Criação de pedidos
-- Histórico de pedidos
-- Controle de status
-- Persistência do endereço de entrega
+<strong>Configure as variáveis de ambiente</strong>
 
-### Pagamentos
-- Simulação de pagamento
-- Controle de parcelas
-- Aplicação de desconto
+Copie o arquivo de exemplo e edite os valores:
 
----
+<strong>Linux/macOS/Git Bash:</strong>
 
-## Modelagem do Banco de Dados
+cp .env.example .env
 
-O banco foi modelado considerando regras de negócio reais de um e-commerce, incluindo:
+<strong>PowerShell:</strong>
 
-- Usuários
-- Endereços
-- Produtos
-- Categorias
-- Marcas
-- Carrinho
-- Pedidos
-- Pagamentos
+Copy-Item .env.example .env
 
-### DER do Projeto
+Preencha no .env as variáveis exigidas pelo docker-compose.yml, incluindo as credenciais de integração e a expiração do refresh token. Exemplo de variáveis esperadas:
 
-![DER do Projeto](GuliX/docs/der-gulix.png)
+MYSQL_ROOT_PASSWORD=defina_uma_senha_local
+MYSQL_DATABASE=gulix
+MYSQL_USER=gulix
+MYSQL_PASSWORD=defina_uma_senha_local
 
----
+DB_URL=jdbc:mysql://mysql:3306/gulix
+DB_USERNAME=gulix
+DB_PASSWORD=defina_uma_senha_local
 
-## Como testar a API
+JWT_SECRET=use_um_segredo_forte_e_adequado_ao_algoritmo
+JWT_EXPIRATION=3600000
+REFRESH_TOKEN_EXPIRATION=604800000
 
-A API pode ser executada localmente e testada através do Swagger/OpenAPI.
+STRIPE_SECRET_KEY=sk_test_sua_chave
+STRIPE_WEBHOOK_SECRET=whsec_seu_segredo_de_teste
+OPEN_ROUTE_SERVICE_KEY=sua_chave_openrouteservice
 
-### Swagger
-http://localhost:8080/swagger-ui/index.html
+Use valores compatíveis com sua configuração local. Não envie o arquivo .env ao Git.
 
-## Como Executar
+<strong>Suba os serviços</strong>
 
-Clone o projeto:
+docker compose up --build
 
-```bash
-git clone URL_DO_REPOSITORIO 
-```
+O Compose configura o backend na porta 8080 e publica o MySQL na porta 3307 do host. O backend se conecta ao MySQL pelo nome do serviço mysql na rede do Compose.
 
-Entre na pasta:
+Quando a aplicação estiver pronta, acesse a documentação em http://localhost:8080/swagger-ui/index.html.
 
-```bash
-cd gulix-backend
-```
+Para encerrar os serviços:
 
-Configure o banco no:
+docker compose down
 
-```properties
-application.properties
-```
+Para remover também o volume persistente do banco (isso apaga os dados locais):
 
-Execute:
+docker compose down -v
 
-```bash
-./mvnw spring-boot:run
-```
+<strong>Como executar localmente</strong>
 
----
+Se preferir executar o backend fora do Docker, disponibilize uma instância MySQL acessível pela sua máquina e configure as variáveis de ambiente utilizadas em application.properties:
 
-## Autor
+DB_URL
 
-**Gustavo Nagai Amorim**
+DB_USERNAME
 
-GitHub: https://github.com/gulinagai  
-LinkedIn: https://www.linkedin.com/in/gustavo-nagai/
+DB_PASSWORD
+
+JWT_SECRET
+
+JWT_EXPIRATION
+
+REFRESH_TOKEN_EXPIRATION
+
+STRIPE_SECRET_KEY
+
+STRIPE_WEBHOOK_SECRET
+
+OPEN_ROUTE_SERVICE_KEY
+
+Exemplo para iniciar o backend no Linux/macOS:
+
+cd GuliX/backend
+./mvnw spring-boot
+
+No Windows, utilize:
+
+cd GuliX/backend
+.\mvnw.cmd spring-boot
+
+Nota para ambientes de produção: o Spring configura spring.jpa.hibernate.ddl-auto=update no perfil atual. Para ambientes de produção, recomenda-se substituir a atualização automática do esquema por migrações versionadas, por exemplo com Flyway ou Liquibase.
+
+<strong>Documentação da API</strong>
+
+Com a aplicação em execução, a interface interativa Swagger UI fica disponível em:
+
+Swagger UI: http://localhost:8080/swagger-ui/index.html
+
+Documento OpenAPI: http://localhost:8080/v3/api-docs
+
+A API agrupa recursos de autenticação, usuários, produtos, categorias, marcas, carrinho, pedidos, pagamentos, estoque, endereços, empresas, filiais, estados, cidades e políticas de frete. Consulte o Swagger para visualizar os caminhos, parâmetros, contratos DTO, permissões e respostas definidos no código atual.
+
+<strong>Testes e qualidade</strong>
+
+A suíte de testes automatizados está organizada por camada e recurso, incluindo testes de controllers, segurança, serviços e repositórios. Fixtures reutilizáveis apoiam a preparação dos cenários de teste.
+
+Execute a suíte de testes e a verificação do build com:
+
+cd GuliX/backend
+./mvnw clean verify
+
+No Windows:
+
+cd GuliX/backend
+.\mvnw.cmd clean verify
+
+O comando compila a aplicação, executa os testes configurados e verifica o resultado do build. A dependência H2 está disponível para testes que utilizam banco em memória; as dependências do Testcontainers também estão declaradas para cenários de integração com MySQL em contêiner, quando aplicáveis.
+
+<strong>CI — Integração contínua</strong>
+
+O workflow em .github/workflows/ci.yml é executado em pushes e em pull requests direcionados à branch main. Ele configura Java 25, utiliza cache do Maven e executa:
+
+./mvnw clean verify
+
+O resultado mais recente do pipeline pode ser consultado na aba Actions do repositório: GitHub Actions.
+
+<strong>Configuração e segurança de ambiente</strong>
+
+Nunca versione .env, tokens, senhas ou chaves privadas.
+
+Mantenha .env.example com nomes de variáveis e valores fictícios, sem credenciais válidas.
+
+Em produção, utilize um gerenciador de segredos e credenciais diferentes das de desenvolvimento.
+
+Configure CORS para os domínios realmente autorizados.
+
+Ative HTTPS e monitore erros e integrações externas.
+
+Avalie migrações de banco, logs estruturados, métricas, health checks e limites de requisição antes do deploy.
+
+<strong>Regras de negócio</strong>
+
+As regras de negócio conhecidas e documentadas devem ser consultadas em business-rules.md. Entre os pontos do domínio estão o cálculo de frete, o controle de estoque disponível/reservado, o fluxo de pedidos e as condições de pagamento e parcelamento.
+
+<strong>Escopo e evolução</strong>
+
+O GuliX reúne os principais fluxos de uma API de e-commerce em um escopo definido: autenticação, catálogo, carrinho, pedidos, estoque, pagamentos e logística. A implementação é acompanhada de documentação técnica, testes automatizados e integração contínua.
+
+Como em qualquer aplicação de software, o projeto pode receber evoluções adicionais conforme novos requisitos sejam definidos. Entre as possibilidades estão o aprofundamento da observabilidade, a adoção de migrações versionadas de banco de dados e a automação de implantação. Esses itens são oportunidades de evolução, não funcionalidades anunciadas como já implementadas.
+
+<strong>Autor</strong>
+
+Gustavo Nagai Amorim
+
+GitHub: @gulinagai
+
+LinkedIn: gustavo-nagai
+
+<p align="center">Projeto autoral de portfólio, com foco em desenvolvimento backend e boas práticas de engenharia de software.</p>
