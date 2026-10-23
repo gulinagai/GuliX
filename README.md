@@ -17,15 +17,15 @@ O GuliX é uma API REST para um e-commerce de hardware, desenvolvida com Java e 
 
 A solução foi estruturada com separação de responsabilidades, regras de negócio organizadas em serviços, persistência relacional, documentação interativa, testes automatizados e integração contínua. O objetivo é demonstrar a construção de um backend organizado, com atenção a segurança, manutenibilidade e integração com serviços externos.
 
-DER - Diagrama Entidade-Relacionamento
+<strong>DER - Diagrama Entidade-Relacionamento</strong>
 
 ![DER_GuliX.png](GuliX/docs/DER_GuliX.png)
 
-Visão geral
+<strong>Visão geral</strong>
 
-Domínio
+<strong>Domínio</strong>
 
-Recursos principais
+<strong>Recursos principais</strong>
 
 Acesso
 
@@ -47,7 +47,7 @@ Engenharia
 
 API documentada, testes automatizados, Docker e CI
 
-Índice
+<strong>Índice</strong>
 
 Funcionalidades
 
@@ -81,9 +81,9 @@ Escopo e evolução
 
 Autor
 
-Funcionalidades
+<strong>Funcionalidades</strong>
 
-Autenticação e usuários
+<strong>Autenticação e usuários</strong>
 
 Cadastro e login de usuários.
 
@@ -99,7 +99,7 @@ Senhas armazenadas com hash, sem persistir senhas em texto puro.
 
 Endpoints de consulta, atualização e exclusão de usuários.
 
-🛒 Catálogo de produtos
+<strong>Catálogo de produtos</strong>
 
 Operações de consulta e manutenção de produtos.
 
@@ -109,7 +109,7 @@ Filtros de consulta e paginação com Spring Data JPA e Specification.
 
 Suporte a informações comerciais, como preço e descontos, conforme as regras de domínio.
 
-Carrinho e pedidos
+<strong>Carrinho e pedidos</strong>
 
 Consulta do carrinho.
 
@@ -125,7 +125,7 @@ Consulta administrativa e atualização de status do pedido.
 
 Persistência dos dados necessários ao pedido e ao endereço de entrega.
 
-Estoque
+<strong>Estoque</strong>
 
 Consulta de estoque por produto.
 
@@ -135,7 +135,7 @@ Atualização de inventário.
 
 Separação entre quantidade total e quantidade reservada, apoiando o controle de disponibilidade.
 
-Endereços e estrutura geográfica
+<strong>Endereços e estrutura geográfica</strong>
 
 Cadastro e manutenção de endereços.
 
@@ -147,7 +147,7 @@ Armazenamento de coordenadas geográficas para apoiar o cálculo de frete.
 
 Cadastro de empresas e filiais.
 
-Pagamentos e frete
+<strong>Pagamentos e frete</strong>
 
 Integração de checkout com Stripe.
 
@@ -161,7 +161,7 @@ Integração com OpenRouteService para obtenção de informações de rota/dist�
 
 Cadastro e consulta de políticas de frete.
 
-Tratamento de erros e validação
+<strong>Tratamento de erros e validação</strong>
 
 Validação de dados de entrada com Jakarta Bean Validation.
 
@@ -171,11 +171,11 @@ Respostas de erro padronizadas por meio de ErrorResponseDTO.
 
 Configuração de respostas de autenticação e autorização para requisições não autorizadas ou proibidas.
 
-Tecnologias
+<strong>Tecnologias</strong>
 
-Área
+<strong>Área</strong>
 
-Tecnologias
+<strong>Tecnologias</strong>
 
 Linguagem
 
@@ -233,7 +233,7 @@ CI
 
 GitHub Actions
 
-Arquitetura e organização
+<strong>Arquitetura e organização</strong>
 
 O backend segue uma organização em camadas para manter separadas as responsabilidades de entrada HTTP, regras de negócio e acesso a dados:
 
@@ -251,8 +251,7 @@ Config / Security: reúne configurações da aplicação, integrações, autenti
 
 Tratamento de erros: centraliza a conversão de falhas em respostas consistentes.
 
-
-Segurança
+<strong>Segurança</strong>
 
 A API utiliza Spring Security e tokens JWT para proteger recursos e aplicar autorização. O projeto também define handlers específicos para falhas de autenticação e autorização e configura CORS.
 
@@ -260,29 +259,29 @@ A implementação contempla a separação entre endpoints públicos e protegidos
 
 A execução em produção exige configuração própria do ambiente, incluindo HTTPS, segredos fortes, CORS restrito aos domínios autorizados, gestão de credenciais e políticas de operação adequadas. As credenciais de exemplo são destinadas exclusivamente ao desenvolvimento local.
 
-Integrações externas
+<strong>Integrações externas</strong>
 
-Stripe
+<strong>Stripe</strong>
 
 Responsável pelo fluxo de checkout/pagamento. Para executar os fluxos integrados, é necessário configurar a chave secreta e, quando aplicável, o segredo de webhook da sua conta Stripe. Use credenciais de teste durante o desenvolvimento.
 
-OpenRouteService
+<strong>OpenRouteService</strong>
 
 Utilizado para obter dados de rota/distância que alimentam o cálculo de frete. É necessário configurar uma chave de API válida e considerar os limites de uso do serviço.
 
 Essas integrações dependem de credenciais externas e de conectividade; a execução local da aplicação não garante que os fluxos de pagamento ou roteamento funcionem sem essa configuração.
 
-Banco de dados
+<strong>Banco de dados</strong>
 
 O projeto utiliza MySQL e persiste os dados por meio de Spring Data JPA/Hibernate. O modelo contempla, entre outros, usuários, endereços, catálogo, categorias, marcas, carrinho, pedidos, pagamentos, estoque, empresas, filiais, estados, cidades e políticas de frete.
 
-Diagrama Entidade-Relacionamento
+<strong>Diagrama Entidade-Relacionamento</strong>
 
 
 
 As regras de negócio documentadas estão em GuliX/docs/business-rules.md.
 
-Pré-requisitos
+<strong>Pré-requisitos</strong>
 
 Para executar localmente:
 
@@ -296,22 +295,22 @@ Credenciais de teste do Stripe e chave do OpenRouteService para testar os fluxos
 
 O Maven Wrapper (mvnw / mvnw.cmd) está incluído no repositório; não é necessário instalar o Maven separadamente.
 
-Como executar com Docker
+<strong>Como executar com Docker</strong>
 
-1. Clone o repositório
+<strong>Clone o repositório</strong>
 
 git clone https://github.com/gulinagai/projeto-GuliX.git
 cd projeto-GuliX/GuliX/backend
 
-2. Configure as variáveis de ambiente
+<strong>Configure as variáveis de ambiente</strong>
 
 Copie o arquivo de exemplo e edite os valores:
 
-Linux/macOS/Git Bash:
+<strong>Linux/macOS/Git Bash:</strong>
 
 cp .env.example .env
 
-PowerShell:
+<strong>PowerShell:</strong>
 
 Copy-Item .env.example .env
 
@@ -336,7 +335,7 @@ OPEN_ROUTE_SERVICE_KEY=sua_chave_openrouteservice
 
 Use valores compatíveis com sua configuração local. Não envie o arquivo .env ao Git.
 
-3. Suba os serviços
+<strong>Suba os serviços</strong>
 
 docker compose up --build
 
@@ -352,7 +351,7 @@ Para remover também o volume persistente do banco (isso apaga os dados locais):
 
 docker compose down -v
 
-Como executar localmente
+<strong>Como executar localmente</strong>
 
 Se preferir executar o backend fora do Docker, disponibilize uma instância MySQL acessível pela sua máquina e configure as variáveis de ambiente utilizadas em application.properties:
 
@@ -377,16 +376,16 @@ OPEN_ROUTE_SERVICE_KEY
 Exemplo para iniciar o backend no Linux/macOS:
 
 cd GuliX/backend
-./mvnw spring-boot:run
+./mvnw spring-boot
 
 No Windows, utilize:
 
 cd GuliX/backend
-.\mvnw.cmd spring-boot:run
+.\mvnw.cmd spring-boot
 
 Nota para ambientes de produção: o Spring configura spring.jpa.hibernate.ddl-auto=update no perfil atual. Para ambientes de produção, recomenda-se substituir a atualização automática do esquema por migrações versionadas, por exemplo com Flyway ou Liquibase.
 
-Documentação da API
+<strong>Documentação da API</strong>
 
 Com a aplicação em execução, a interface interativa Swagger UI fica disponível em:
 
@@ -396,7 +395,7 @@ Documento OpenAPI: http://localhost:8080/v3/api-docs
 
 A API agrupa recursos de autenticação, usuários, produtos, categorias, marcas, carrinho, pedidos, pagamentos, estoque, endereços, empresas, filiais, estados, cidades e políticas de frete. Consulte o Swagger para visualizar os caminhos, parâmetros, contratos DTO, permissões e respostas definidos no código atual.
 
-Testes e qualidade
+<strong>Testes e qualidade</strong>
 
 A suíte de testes automatizados está organizada por camada e recurso, incluindo testes de controllers, segurança, serviços e repositórios. Fixtures reutilizáveis apoiam a preparação dos cenários de teste.
 
@@ -412,7 +411,7 @@ cd GuliX/backend
 
 O comando compila a aplicação, executa os testes configurados e verifica o resultado do build. A dependência H2 está disponível para testes que utilizam banco em memória; as dependências do Testcontainers também estão declaradas para cenários de integração com MySQL em contêiner, quando aplicáveis.
 
-CI — Integração contínua
+<strong>CI — Integração contínua</strong>
 
 O workflow em .github/workflows/ci.yml é executado em pushes e em pull requests direcionados à branch main. Ele configura Java 25, utiliza cache do Maven e executa:
 
@@ -420,7 +419,7 @@ O workflow em .github/workflows/ci.yml é executado em pushes e em pull requests
 
 O resultado mais recente do pipeline pode ser consultado na aba Actions do repositório: GitHub Actions.
 
-Configuração e segurança de ambiente
+<strong>Configuração e segurança de ambiente</strong>
 
 Nunca versione .env, tokens, senhas ou chaves privadas.
 
@@ -434,17 +433,17 @@ Ative HTTPS e monitore erros e integrações externas.
 
 Avalie migrações de banco, logs estruturados, métricas, health checks e limites de requisição antes do deploy.
 
-Regras de negócio
+<strong>Regras de negócio</strong>
 
 As regras de negócio conhecidas e documentadas devem ser consultadas em business-rules.md. Entre os pontos do domínio estão o cálculo de frete, o controle de estoque disponível/reservado, o fluxo de pedidos e as condições de pagamento e parcelamento.
 
-Escopo e evolução
+<strong>Escopo e evolução</strong>
 
 O GuliX reúne os principais fluxos de uma API de e-commerce em um escopo definido: autenticação, catálogo, carrinho, pedidos, estoque, pagamentos e logística. A implementação é acompanhada de documentação técnica, testes automatizados e integração contínua.
 
 Como em qualquer aplicação de software, o projeto pode receber evoluções adicionais conforme novos requisitos sejam definidos. Entre as possibilidades estão o aprofundamento da observabilidade, a adoção de migrações versionadas de banco de dados e a automação de implantação. Esses itens são oportunidades de evolução, não funcionalidades anunciadas como já implementadas.
 
-Autor
+<strong>Autor</strong>
 
 Gustavo Nagai Amorim
 
