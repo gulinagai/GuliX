@@ -6,6 +6,7 @@ import guli.gulix.backend.entity.Estoque;
 import guli.gulix.backend.entity.Marca;
 import guli.gulix.backend.entity.Produto;
 import guli.gulix.backend.exception.RecursoNaoEncontradoException;
+import guli.gulix.backend.exception.RegraNegocioException;
 import guli.gulix.backend.mapper.EstoqueMapper;
 import guli.gulix.backend.mapper.ProdutoMapper;
 import guli.gulix.backend.repository.CategoriaRepository;
@@ -207,6 +208,25 @@ public class ProdutoServiceImpl implements ProdutoService {
                             ));
             produto.setMarca(marca);
         }
+
+        return produtoMapper.toDTO(produto);
+    }
+
+    @Override
+    public ProdutoResponseDTO destacarProduto(Integer produtoId, ProdutoDestaqueDTO produtoDestaque) {
+
+        Produto produto = produtoRepository.findById(produtoId)
+                .orElseThrow(() ->
+                        new RecursoNaoEncontradoException(
+                                "Produto com id " + produtoId + " não encontrado"
+                        ));
+
+        if (Boolean.TRUE.equals(produto.getDestaque())) {
+            throw new RegraNegocioException("Produto já está em destaque");
+        }
+
+        produto.setDestaque(true);
+        produto.setDesconto(produtoDestaque.getDesconto());
 
         return produtoMapper.toDTO(produto);
     }

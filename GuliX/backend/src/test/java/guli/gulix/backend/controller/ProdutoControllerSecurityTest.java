@@ -2,6 +2,7 @@ package guli.gulix.backend.controller;
 
 import guli.gulix.backend.config.SecurityConfig;
 import guli.gulix.backend.dto.ProdutoCreateDTO;
+import guli.gulix.backend.dto.ProdutoDestaqueDTO;
 import guli.gulix.backend.dto.ProdutoPatchDTO;
 import guli.gulix.backend.dto.ProdutoUpdateDTO;
 import guli.gulix.backend.fixture.ProdutoFixture;
@@ -247,6 +248,53 @@ public class ProdutoControllerSecurityTest {
 
         verifyNoInteractions(produtoService);
 
+    }
+
+    // destacarProduto(@PathVariable("produtoId") Integer produtoId, @Valid @RequestBody ProdutoDestaqueDTO produtoDestaque)
+
+    @Test
+    void deveRetornar401QuandoUsuarioNaoAutenticadoAoDestacarProduto() throws Exception {
+
+        // Arrange
+
+        ProdutoDestaqueDTO produtoDestaque = ProdutoFixture.produtoDestaqueDTO();
+
+        // Act
+
+        mockmvc.perform(
+                        patch("/api/v1/produtos/1/destaque")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(produtoDestaque))
+                )
+
+                // Assert
+
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(produtoService);
+    }
+
+    @Test
+    void deveRetornar403QuandoUsuarioNaoAutorizadoAoDestacarProduto() throws Exception {
+
+        // Arrange
+
+        ProdutoDestaqueDTO produtoDestaque = ProdutoFixture.produtoDestaqueDTO();
+
+        // Act
+
+        mockmvc.perform(
+                        patch("/api/v1/produtos/1/destaque")
+                                .with(user("usuarioTeste").roles("USER"))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(produtoDestaque))
+                )
+
+                // Assert
+
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(produtoService);
     }
 
 
