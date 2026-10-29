@@ -24,7 +24,7 @@ public class ProdutoResponseDTO {
     @Schema( description = "Resumo das características do produto.", example = "Placa de vídeo AMD Radeon RX 6650 XT com 8 GB de memória." )
     private String resumo;
 
-    @Schema( description = "Preço atual do produto.", example = "1899.90" )
+    @Schema( description = "Preço original do produto, sem desconto promocional.", example = "1899.90" )
     private BigDecimal preco;
 
     @Schema( description = "Informações de estoque do produto." )
@@ -36,8 +36,11 @@ public class ProdutoResponseDTO {
     @Schema( description = "Nome do arquivo ou URL da imagem do produto.", example = "rx-6650-xt.jpg" )
     private String imagemURL;
 
-    @Schema( description = "Valor de desconto aplicado ao produto.", example = "100.00" )
+    @Schema( description = "Percentual de desconto promocional efetivamente aplicado. Permanece 0.00 quando o produto não está em destaque.", example = "10.00" )
     private BigDecimal desconto;
+
+    @Schema( description = "Preço unitário após o desconto promocional. Igual ao preço original quando não há desconto aplicável.", example = "1709.91" )
+    private BigDecimal precoFinal;
 
     @Schema( description = "Identificador da categoria à qual o produto pertence.", example = "3" )
     private Integer categoriaId;

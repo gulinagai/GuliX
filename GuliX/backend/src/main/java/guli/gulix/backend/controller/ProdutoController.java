@@ -69,10 +69,15 @@ public class ProdutoController {
             )
             @RequestParam(required = false) Integer marcaId,
 
+            @Parameter(
+                    description = "Filtra produtos pelo indicador de destaque. true retorna somente produtos em destaque.",
+                    example = "true"
+            )
+            @RequestParam(required = false) Boolean destaque,
 
             Pageable pageable
     ) {
-        return ResponseEntity.ok(produtoService.getAllProduto(nome, categoriaId, marcaId, pageable));
+        return ResponseEntity.ok(produtoService.getAllProduto(nome, categoriaId, marcaId, destaque, pageable));
     }
 
     @Operation(
@@ -344,6 +349,189 @@ public class ProdutoController {
         ProdutoResponseDTO produtoAtualizado = produtoService.updatePartialProdutoById(produtoId, produtoAtualizar);
 
        return ResponseEntity.ok(produtoAtualizado);
+    }
+
+    @Operation(
+            summary = "Destacar produto",
+            description = "Marca um produto existente como destaque e define o percentual de desconto. O preço original não é alterado. Esta operação requer autenticação com perfil ADMIN."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Produto destacado com sucesso."
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Os dados enviados são inválidos ou o produto já está em destaque.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(
+                                    oneOf = {
+                                            ValidationErrorResponseDTO.class,
+                                            ErrorResponseDTO.class
+                                    }
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Credenciais inválidas ou autenticação não realizada.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "O usuário autenticado não possui permissão de administrador.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Produto não encontrado.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PatchMapping("/{produtoId}/destaque")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProdutoResponseDTO> destacarProduto(
+            @Parameter(
+                    description = "Identificador único do produto.",
+                    example = "1"
+            )
+            @PathVariable("produtoId") Integer produtoId,
+            @Valid @RequestBody ProdutoDestaqueDTO produtoDestaque) {
+
+        ProdutoResponseDTO produtoDestacado = produtoService.destacarProduto(produtoId, produtoDestaque);
+
+        return ResponseEntity.ok(produtoDestacado);
+    }
+
+    @Operation(
+            summary = "Alterar desconto do produto em destaque",
+            description = "Altera somente o percentual de desconto de um produto que já está em destaque. O preço original e o campo destaque não são alterados. Esta operação requer autenticação com perfil ADMIN."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Desconto do produto em destaque atualizado com sucesso."
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Os dados enviados são inválidos ou o produto não está em destaque.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(
+                                    oneOf = {
+                                            ValidationErrorResponseDTO.class,
+                                            ErrorResponseDTO.class
+                                    }
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Credenciais inválidas ou autenticação não realizada.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "O usuário autenticado não possui permissão de administrador.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Produto não encontrado.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PatchMapping("/{produtoId}/destaque/desconto")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProdutoResponseDTO> atualizarDescontoDestaque(
+            @Parameter(
+                    description = "Identificador único do produto.",
+                    example = "1"
+            )
+            @PathVariable("produtoId") Integer produtoId,
+            @Valid @RequestBody ProdutoDestaqueDTO produtoDestaque) {
+
+        ProdutoResponseDTO produtoAtualizado = produtoService.atualizarDescontoDestaque(produtoId, produtoDestaque);
+
+        return ResponseEntity.ok(produtoAtualizado);
+    }
+
+    @Operation(
+            summary = "Remover destaque do produto",
+            description = "Remove o destaque de um produto e zera o percentual de desconto. O produto e o preço original não são alterados. Esta operação requer autenticação com perfil ADMIN."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Destaque removido com sucesso."
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "O produto não está em destaque ou o identificador é inválido.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Credenciais inválidas ou autenticação não realizada.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "O usuário autenticado não possui permissão de administrador.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Produto não encontrado.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @DeleteMapping("/{produtoId}/destaque")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProdutoResponseDTO> removerDestaque(
+            @Parameter(
+                    description = "Identificador único do produto.",
+                    example = "1"
+            )
+            @PathVariable("produtoId") Integer produtoId) {
+
+        ProdutoResponseDTO produto = produtoService.removerDestaque(produtoId);
+
+        return ResponseEntity.ok(produto);
     }
 
 }

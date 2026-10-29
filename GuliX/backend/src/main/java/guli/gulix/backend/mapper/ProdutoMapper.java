@@ -19,6 +19,7 @@ public interface ProdutoMapper {
     // Entity para DTO (Response)
     @Mapping(source = "categoria.id", target = "categoriaId")
     @Mapping(source = "marca.id", target = "marcaId")
+    @Mapping(target = "precoFinal", ignore = true)
     ProdutoResponseDTO toDTO(Produto produto);
 
     // Update (PUT)

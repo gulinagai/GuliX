@@ -30,4 +30,12 @@ public class ProdutoSpecification {
                 );
     }
 
+    public static Specification<Produto> destaqueEquals(Boolean destaque) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(
+                        root.get("destaque"),
+                        destaque
+                );
+    }
+
 }

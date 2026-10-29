@@ -7,10 +7,12 @@ import guli.gulix.backend.dto.PedidoUpdateStatusDTO;
 import guli.gulix.backend.entity.Carrinho;
 import guli.gulix.backend.entity.Endereco;
 import guli.gulix.backend.entity.EnderecoEntrega;
+import guli.gulix.backend.entity.ItemCarrinho;
 import guli.gulix.backend.entity.ItemPedido;
 import guli.gulix.backend.entity.Pedido;
 import guli.gulix.backend.entity.Produto;
 import guli.gulix.backend.entity.Usuario;
+import guli.gulix.backend.entity.enums.MetodoPagamento;
 import guli.gulix.backend.entity.enums.StatusPedido;
 import guli.gulix.backend.exception.RecursoNaoEncontradoException;
 import guli.gulix.backend.exception.RegraNegocioException;
@@ -28,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -63,6 +66,9 @@ class PedidoServiceImplTest {
 
     @Mock
     private CalculoFreteService calculoFreteService;
+
+    @Spy
+    private PrecoPromocionalService precoPromocionalService = new PrecoPromocionalService();
 
     @InjectMocks
     private PedidoServiceImpl pedidoService;
@@ -178,14 +184,14 @@ class PedidoServiceImplTest {
         PagamentoResponseDTO pagamento = PedidoFixture.pagamentoResponseDTO();
         Produto produto = carrinho.getItens().get(0).getProduto();
         Integer quantidade = carrinho.getItens().get(0).getQuantidade();
-        BigDecimal subtotal = new BigDecimal("1239.98");
+        BigDecimal precoOriginal = produto.getPreco();
+        BigDecimal subtotal = new BigDecimal("1115.98");
         BigDecimal frete = new BigDecimal("25.90");
 
         when(carrinhoRepository.findByUsuarioId(usuario.getId())).thenReturn(Optional.of(carrinho));
         when(estoqueService.getQuantidadeDisponivel(produto.getId())).thenReturn(10);
         when(enderecoRepository.findByIdAndUsuario(pedidoCreateDTO.getEnderecoId(), usuario))
                 .thenReturn(Optional.of(endereco));
-        when(carrinhoService.calcularTotal(carrinho)).thenReturn(subtotal);
         when(calculoFreteService.calcularFrete(
                 new Coordenada(endereco.getLatitude().doubleValue(), endereco.getLongitude().doubleValue()),
                 endereco.getEstado()
@@ -209,7 +215,7 @@ class PedidoServiceImplTest {
         assertEquals(StatusPedido.PENDENTE, pedidoSalvo.getStatusPedido());
         assertEquals(0, subtotal.compareTo(pedidoSalvo.getSubtotal()));
         assertEquals(0, frete.compareTo(pedidoSalvo.getValorFrete()));
-        assertEquals(0, subtotal.add(frete).compareTo(pedidoSalvo.getTotal()));
+        assertEquals(0, new BigDecimal("1141.88").compareTo(pedidoSalvo.getTotal()));
 
         EnderecoEntrega entrega = pedidoSalvo.getEnderecoEntrega();
         assertEquals(endereco.getRua(), entrega.getRua());
@@ -224,7 +230,9 @@ class PedidoServiceImplTest {
         ItemPedido itemPedido = pedidoSalvo.getItens().get(0);
         assertSame(produto, itemPedido.getProduto());
         assertEquals(quantidade, itemPedido.getQuantidade());
-        assertEquals(0, produto.getPreco().compareTo(itemPedido.getPrecoUnitario()));
+        assertEquals(0, new BigDecimal("557.99").compareTo(itemPedido.getPrecoUnitario()));
+        assertSame(precoOriginal, produto.getPreco());
+        assertEquals(0, new BigDecimal("619.99").compareTo(produto.getPreco()));
         assertSame(pedidoSalvo, itemPedido.getPedido());
 
         verify(estoqueService).getQuantidadeDisponivel(produto.getId());
@@ -235,8 +243,63 @@ class PedidoServiceImplTest {
         );
         verify(pedidoMapper).toDTO(pedidoSalvo);
         verify(pagamentoService).criarPagamento(pedidoSalvo, pedidoCreateDTO);
+        verifyNoInteractions(carrinhoService);
         assertTrue(carrinho.getItens().isEmpty());
         assertSame(pagamento, resultado.getPagamento());
+    }
+
+    @Test
+    void deveAplicarDescontoPromocionalPorItemAntesDoFrete() {
+        Carrinho carrinho = CarrinhoFixture.carrinho();
+        carrinho.setUsuario(usuario);
+
+        Produto promocional = produto(1, "200.00", true, "10.00");
+        Produto destacadoSemDesconto = produto(2, "1000.00", true, "0.00");
+        Produto semDestaque = produto(3, "50.00", false, "20.00");
+
+        carrinho.getItens().add(item(promocional, 2));
+        carrinho.getItens().add(item(destacadoSemDesconto, 1));
+        carrinho.getItens().add(item(semDestaque, 3));
+
+        Endereco endereco = PedidoFixture.endereco();
+        endereco.setUsuario(usuario);
+        PedidoCreateDTO pedidoCreateDTO = PedidoFixture.pedidoCreateDTO();
+        pedidoCreateDTO.setMetodoPagamento(MetodoPagamento.BOLETO);
+        BigDecimal frete = new BigDecimal("40.00");
+
+        when(carrinhoRepository.findByUsuarioId(usuario.getId())).thenReturn(Optional.of(carrinho));
+        when(estoqueService.getQuantidadeDisponivel(1)).thenReturn(10);
+        when(estoqueService.getQuantidadeDisponivel(2)).thenReturn(10);
+        when(estoqueService.getQuantidadeDisponivel(3)).thenReturn(10);
+        when(enderecoRepository.findByIdAndUsuario(pedidoCreateDTO.getEnderecoId(), usuario))
+                .thenReturn(Optional.of(endereco));
+        when(calculoFreteService.calcularFrete(
+                new Coordenada(endereco.getLatitude().doubleValue(), endereco.getLongitude().doubleValue()),
+                endereco.getEstado()
+        )).thenReturn(frete);
+        when(pedidoRepository.save(any(Pedido.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(pedidoMapper.toDTO(any(Pedido.class))).thenReturn(pedidoResponseDTO);
+        when(pagamentoService.criarPagamento(any(Pedido.class), eq(pedidoCreateDTO)))
+                .thenReturn(PedidoFixture.pagamentoResponseDTO());
+
+        pedidoService.createNewPedido(usuario, pedidoCreateDTO);
+
+        ArgumentCaptor<Pedido> pedidoCaptor = ArgumentCaptor.forClass(Pedido.class);
+        verify(pedidoRepository).save(pedidoCaptor.capture());
+        Pedido pedidoSalvo = pedidoCaptor.getValue();
+
+        assertEquals(0, new BigDecimal("180.00").compareTo(pedidoSalvo.getItens().get(0).getPrecoUnitario()));
+        assertEquals(0, new BigDecimal("1000.00").compareTo(pedidoSalvo.getItens().get(1).getPrecoUnitario()));
+        assertEquals(0, new BigDecimal("50.00").compareTo(pedidoSalvo.getItens().get(2).getPrecoUnitario()));
+        assertEquals(0, new BigDecimal("1510.00").compareTo(pedidoSalvo.getSubtotal()));
+        assertEquals(0, frete.compareTo(pedidoSalvo.getValorFrete()));
+        assertEquals(0, new BigDecimal("1550.00").compareTo(pedidoSalvo.getTotal()));
+        assertEquals(0, new BigDecimal("200.00").compareTo(promocional.getPreco()));
+        assertEquals(0, new BigDecimal("1000.00").compareTo(destacadoSemDesconto.getPreco()));
+        assertEquals(0, new BigDecimal("50.00").compareTo(semDestaque.getPreco()));
+        assertEquals(0, new BigDecimal("20.00").compareTo(semDestaque.getDesconto()));
+        verify(pagamentoService).criarPagamento(pedidoSalvo, pedidoCreateDTO);
+        verifyNoInteractions(carrinhoService);
     }
 
     @Test
@@ -464,5 +527,21 @@ class PedidoServiceImplTest {
         assertEquals(StatusPedido.PENDENTE, pedido.getStatusPedido());
         verifyNoInteractions(pedidoMapper, estoqueService);
         verify(pedidoRepository, never()).save(any(Pedido.class));
+    }
+
+    private Produto produto(Integer id, String preco, boolean destaque, String desconto) {
+        Produto produto = new Produto();
+        produto.setId(id);
+        produto.setPreco(new BigDecimal(preco));
+        produto.setDestaque(destaque);
+        produto.setDesconto(new BigDecimal(desconto));
+        return produto;
+    }
+
+    private ItemCarrinho item(Produto produto, int quantidade) {
+        ItemCarrinho item = new ItemCarrinho();
+        item.setProduto(produto);
+        item.setQuantidade(quantidade);
+        return item;
     }
 }

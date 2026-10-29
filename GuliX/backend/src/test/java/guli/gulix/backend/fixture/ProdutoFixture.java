@@ -1,6 +1,7 @@
 package guli.gulix.backend.fixture;
 
 import guli.gulix.backend.dto.ProdutoCreateDTO;
+import guli.gulix.backend.dto.ProdutoDestaqueDTO;
 import guli.gulix.backend.dto.ProdutoPatchDTO;
 import guli.gulix.backend.dto.ProdutoResponseDTO;
 import guli.gulix.backend.dto.ProdutoUpdateDTO;
@@ -75,6 +76,14 @@ public final class ProdutoFixture {
         return dto;
     }
 
+    public static ProdutoDestaqueDTO produtoDestaqueDTO() {
+        ProdutoDestaqueDTO dto = new ProdutoDestaqueDTO();
+
+        dto.setDesconto(new BigDecimal("25.50"));
+
+        return dto;
+    }
+
     public static ProdutoResponseDTO produtoResponseDTO() {
         ProdutoResponseDTO dto = new ProdutoResponseDTO();
 
@@ -88,6 +97,7 @@ public final class ProdutoFixture {
         dto.setMarcaId(1);
         dto.setDestaque(true);
         dto.setDesconto(new BigDecimal("10.00"));
+        dto.setPrecoFinal(new BigDecimal("557.99"));
 
         return dto;
     }

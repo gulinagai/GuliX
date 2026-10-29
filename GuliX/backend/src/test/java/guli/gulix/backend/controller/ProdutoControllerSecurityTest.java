@@ -2,6 +2,7 @@ package guli.gulix.backend.controller;
 
 import guli.gulix.backend.config.SecurityConfig;
 import guli.gulix.backend.dto.ProdutoCreateDTO;
+import guli.gulix.backend.dto.ProdutoDestaqueDTO;
 import guli.gulix.backend.dto.ProdutoPatchDTO;
 import guli.gulix.backend.dto.ProdutoUpdateDTO;
 import guli.gulix.backend.fixture.ProdutoFixture;
@@ -25,6 +26,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
+
+import java.math.BigDecimal;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -249,9 +252,132 @@ public class ProdutoControllerSecurityTest {
 
     }
 
+    // destacarProduto(@PathVariable("produtoId") Integer produtoId, @Valid @RequestBody ProdutoDestaqueDTO produtoDestaque)
 
+    @Test
+    void deveRetornar401QuandoUsuarioNaoAutenticadoAoDestacarProduto() throws Exception {
 
+        // Arrange
 
+        ProdutoDestaqueDTO produtoDestaque = ProdutoFixture.produtoDestaqueDTO();
+
+        // Act
+
+        mockmvc.perform(
+                        patch("/api/v1/produtos/1/destaque")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(produtoDestaque))
+                )
+
+                // Assert
+
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(produtoService);
+    }
+
+    @Test
+    void deveRetornar403QuandoUsuarioNaoAutorizadoAoDestacarProduto() throws Exception {
+
+        // Arrange
+
+        ProdutoDestaqueDTO produtoDestaque = ProdutoFixture.produtoDestaqueDTO();
+
+        // Act
+
+        mockmvc.perform(
+                        patch("/api/v1/produtos/1/destaque")
+                                .with(user("usuarioTeste").roles("USER"))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(produtoDestaque))
+                )
+
+                // Assert
+
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(produtoService);
+    }
+
+    // atualizarDescontoDestaque(@PathVariable("produtoId") Integer produtoId, @Valid @RequestBody ProdutoDestaqueDTO produtoDestaque)
+
+    @Test
+    void deveRetornar401QuandoUsuarioNaoAutenticadoAoAlterarDesconto() throws Exception {
+
+        // Arrange
+
+        ProdutoDestaqueDTO produtoDestaque = new ProdutoDestaqueDTO(new BigDecimal("20.00"));
+
+        // Act
+
+        mockmvc.perform(
+                        patch("/api/v1/produtos/1/destaque/desconto")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(produtoDestaque))
+                )
+
+                // Assert
+
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(produtoService);
+    }
+
+    @Test
+    void deveRetornar403QuandoUsuarioNaoAutorizadoAoAlterarDesconto() throws Exception {
+
+        // Arrange
+
+        ProdutoDestaqueDTO produtoDestaque = new ProdutoDestaqueDTO(new BigDecimal("20.00"));
+
+        // Act
+
+        mockmvc.perform(
+                        patch("/api/v1/produtos/1/destaque/desconto")
+                                .with(user("usuarioTeste").roles("USER"))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(produtoDestaque))
+                )
+
+                // Assert
+
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(produtoService);
+    }
+
+    // removerDestaque(@PathVariable("produtoId") Integer produtoId)
+
+    @Test
+    void deveRetornar401QuandoUsuarioNaoAutenticadoAoRemoverDestaque() throws Exception {
+
+        // Act
+
+        mockmvc.perform(delete("/api/v1/produtos/1/destaque"))
+
+                // Assert
+
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(produtoService);
+    }
+
+    @Test
+    void deveRetornar403QuandoUsuarioNaoAutorizadoAoRemoverDestaque() throws Exception {
+
+        // Act
+
+        mockmvc.perform(
+                        delete("/api/v1/produtos/1/destaque")
+                                .with(user("usuarioTeste").roles("USER"))
+                )
+
+                // Assert
+
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(produtoService);
+    }
 
     @TestConfiguration
     @EnableWebSecurity
