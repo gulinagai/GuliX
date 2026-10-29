@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Dados para destacar um produto e definir o percentual de desconto.")
+@Schema(description = "Percentual de desconto de um produto em destaque.")
 public class ProdutoDestaqueDTO {
 
     @NotNull(message = "O desconto é obrigatório")
@@ -22,7 +22,7 @@ public class ProdutoDestaqueDTO {
     @DecimalMax(value = "100.00", inclusive = true, message = "O desconto não pode ser superior a 100%")
     @Digits(integer = 3, fraction = 2, message = "O desconto deve possuir no máximo 2 casas decimais")
     @Schema(
-            description = "Percentual de desconto do produto em destaque. Use 0.00 para destacar sem desconto.",
+            description = "Percentual de desconto. Use 0.00 quando o produto em destaque não tiver desconto.",
             example = "10.00"
     )
     private BigDecimal desconto;

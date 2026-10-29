@@ -409,4 +409,67 @@ public class ProdutoController {
         return ResponseEntity.ok(produtoDestacado);
     }
 
+    @Operation(
+            summary = "Alterar desconto do produto em destaque",
+            description = "Altera somente o percentual de desconto de um produto que já está em destaque. O preço original e o campo destaque não são alterados. Esta operação requer autenticação com perfil ADMIN."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Desconto do produto em destaque atualizado com sucesso."
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Os dados enviados são inválidos ou o produto não está em destaque.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(
+                                    oneOf = {
+                                            ValidationErrorResponseDTO.class,
+                                            ErrorResponseDTO.class
+                                    }
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Credenciais inválidas ou autenticação não realizada.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "O usuário autenticado não possui permissão de administrador.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Produto não encontrado.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PatchMapping("/{produtoId}/destaque/desconto")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProdutoResponseDTO> atualizarDescontoDestaque(
+            @Parameter(
+                    description = "Identificador único do produto.",
+                    example = "1"
+            )
+            @PathVariable("produtoId") Integer produtoId,
+            @Valid @RequestBody ProdutoDestaqueDTO produtoDestaque) {
+
+        ProdutoResponseDTO produtoAtualizado = produtoService.atualizarDescontoDestaque(produtoId, produtoDestaque);
+
+        return ResponseEntity.ok(produtoAtualizado);
+    }
+
 }

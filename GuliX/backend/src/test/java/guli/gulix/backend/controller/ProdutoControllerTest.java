@@ -996,5 +996,189 @@ class ProdutoControllerTest {
         verify(produtoService).destacarProduto(eq(1), any(ProdutoDestaqueDTO.class));
     }
 
+    // atualizarDescontoDestaque(@PathVariable("produtoId") Integer produtoId, @Valid @RequestBody ProdutoDestaqueDTO produtoDestaque)
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deveRetornar200AoAlterarDescontoDeProdutoEmDestaque() throws Exception {
+
+        // Arrange
+
+        ProdutoDestaqueDTO produtoDestaque = new ProdutoDestaqueDTO(new BigDecimal("20.00"));
+        ProdutoResponseDTO produtoEsperado = ProdutoFixture.produtoResponseDTO();
+        produtoEsperado.setDestaque(true);
+        produtoEsperado.setDesconto(produtoDestaque.getDesconto());
+        produtoEsperado.setPreco(new BigDecimal("619.99"));
+
+        when(produtoService.atualizarDescontoDestaque(eq(1), any(ProdutoDestaqueDTO.class)))
+                .thenReturn(produtoEsperado);
+
+        // Act
+
+        mockMvc.perform(
+                patch("/api/v1/produtos/{produtoId}/destaque/desconto", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(produtoDestaque))
+        )
+
+        // Assert
+
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(produtoEsperado.getId()))
+                .andExpect(jsonPath("$.preco").value(619.99))
+                .andExpect(jsonPath("$.destaque").value(true))
+                .andExpect(jsonPath("$.desconto").value(20.00));
+
+        verify(produtoService).atualizarDescontoDestaque(eq(1), any(ProdutoDestaqueDTO.class));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deveRetornar400QuandoDescontoNaoForInformadoAoAlterarDesconto() throws Exception {
+
+        // Arrange
+
+        ProdutoDestaqueDTO produtoDestaque = new ProdutoDestaqueDTO();
+
+        // Act
+
+        mockMvc.perform(
+                patch("/api/v1/produtos/{produtoId}/destaque/desconto", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(produtoDestaque))
+        )
+
+        // Assert
+
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fields.desconto").exists());
+
+        verifyNoInteractions(produtoService);
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deveRetornar400QuandoDescontoForNegativoAoAlterarDesconto() throws Exception {
+
+        // Arrange
+
+        ProdutoDestaqueDTO produtoDestaque = new ProdutoDestaqueDTO(new BigDecimal("-0.01"));
+
+        // Act
+
+        mockMvc.perform(
+                patch("/api/v1/produtos/{produtoId}/destaque/desconto", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(produtoDestaque))
+        )
+
+        // Assert
+
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fields.desconto").exists());
+
+        verifyNoInteractions(produtoService);
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deveRetornar400QuandoDescontoForMaiorQueCemPorCentoAoAlterarDesconto() throws Exception {
+
+        // Arrange
+
+        ProdutoDestaqueDTO produtoDestaque = new ProdutoDestaqueDTO(new BigDecimal("100.01"));
+
+        // Act
+
+        mockMvc.perform(
+                patch("/api/v1/produtos/{produtoId}/destaque/desconto", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(produtoDestaque))
+        )
+
+        // Assert
+
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fields.desconto").exists());
+
+        verifyNoInteractions(produtoService);
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deveRetornar400QuandoDescontoTiverMaisDeDuasCasasDecimaisAoAlterarDesconto() throws Exception {
+
+        // Arrange
+
+        ProdutoDestaqueDTO produtoDestaque = new ProdutoDestaqueDTO(new BigDecimal("10.555"));
+
+        // Act
+
+        mockMvc.perform(
+                patch("/api/v1/produtos/{produtoId}/destaque/desconto", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(produtoDestaque))
+        )
+
+        // Assert
+
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fields.desconto").exists());
+
+        verifyNoInteractions(produtoService);
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deveRetornar404AoAlterarDescontoDeProdutoInexistente() throws Exception {
+
+        // Arrange
+
+        ProdutoDestaqueDTO produtoDestaque = new ProdutoDestaqueDTO(new BigDecimal("15.00"));
+
+        when(produtoService.atualizarDescontoDestaque(eq(99), any(ProdutoDestaqueDTO.class)))
+                .thenThrow(new RecursoNaoEncontradoException("Produto com id 99 não encontrado"));
+
+        // Act
+
+        mockMvc.perform(
+                patch("/api/v1/produtos/{produtoId}/destaque/desconto", 99)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(produtoDestaque))
+        )
+
+        // Assert
+
+                .andExpect(status().isNotFound());
+
+        verify(produtoService).atualizarDescontoDestaque(eq(99), any(ProdutoDestaqueDTO.class));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deveRetornar400QuandoProdutoNaoEstiverEmDestaqueAoAlterarDesconto() throws Exception {
+
+        // Arrange
+
+        ProdutoDestaqueDTO produtoDestaque = new ProdutoDestaqueDTO(new BigDecimal("15.00"));
+
+        when(produtoService.atualizarDescontoDestaque(eq(1), any(ProdutoDestaqueDTO.class)))
+                .thenThrow(new RegraNegocioException("Produto não está em destaque"));
+
+        // Act
+
+        mockMvc.perform(
+                patch("/api/v1/produtos/{produtoId}/destaque/desconto", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(produtoDestaque))
+        )
+
+        // Assert
+
+                .andExpect(status().isBadRequest());
+
+        verify(produtoService).atualizarDescontoDestaque(eq(1), any(ProdutoDestaqueDTO.class));
+    }
+
 }
 

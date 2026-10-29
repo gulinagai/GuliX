@@ -231,4 +231,22 @@ public class ProdutoServiceImpl implements ProdutoService {
         return produtoMapper.toDTO(produto);
     }
 
+    @Override
+    public ProdutoResponseDTO atualizarDescontoDestaque(Integer produtoId, ProdutoDestaqueDTO produtoDestaque) {
+
+        Produto produto = produtoRepository.findById(produtoId)
+                .orElseThrow(() ->
+                        new RecursoNaoEncontradoException(
+                                "Produto com id " + produtoId + " não encontrado"
+                        ));
+
+        if (!Boolean.TRUE.equals(produto.getDestaque())) {
+            throw new RegraNegocioException("Produto não está em destaque");
+        }
+
+        produto.setDesconto(produtoDestaque.getDesconto());
+
+        return produtoMapper.toDTO(produto);
+    }
+
 }

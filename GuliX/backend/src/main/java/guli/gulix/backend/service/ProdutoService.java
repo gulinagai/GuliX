@@ -26,4 +26,6 @@ public interface ProdutoService {
     ProdutoResponseDTO updatePartialProdutoById(Integer produtoId, ProdutoPatchDTO produtoParcial);
 
     ProdutoResponseDTO destacarProduto(Integer produtoId, ProdutoDestaqueDTO produtoDestaque);
+
+    ProdutoResponseDTO atualizarDescontoDestaque(Integer produtoId, ProdutoDestaqueDTO produtoDestaque);
 }

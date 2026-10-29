@@ -27,6 +27,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import java.math.BigDecimal;
+
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -297,9 +299,52 @@ public class ProdutoControllerSecurityTest {
         verifyNoInteractions(produtoService);
     }
 
+    // atualizarDescontoDestaque(@PathVariable("produtoId") Integer produtoId, @Valid @RequestBody ProdutoDestaqueDTO produtoDestaque)
 
+    @Test
+    void deveRetornar401QuandoUsuarioNaoAutenticadoAoAlterarDesconto() throws Exception {
 
+        // Arrange
 
+        ProdutoDestaqueDTO produtoDestaque = new ProdutoDestaqueDTO(new BigDecimal("20.00"));
+
+        // Act
+
+        mockmvc.perform(
+                        patch("/api/v1/produtos/1/destaque/desconto")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(produtoDestaque))
+                )
+
+                // Assert
+
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(produtoService);
+    }
+
+    @Test
+    void deveRetornar403QuandoUsuarioNaoAutorizadoAoAlterarDesconto() throws Exception {
+
+        // Arrange
+
+        ProdutoDestaqueDTO produtoDestaque = new ProdutoDestaqueDTO(new BigDecimal("20.00"));
+
+        // Act
+
+        mockmvc.perform(
+                        patch("/api/v1/produtos/1/destaque/desconto")
+                                .with(user("usuarioTeste").roles("USER"))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(produtoDestaque))
+                )
+
+                // Assert
+
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(produtoService);
+    }
 
     @TestConfiguration
     @EnableWebSecurity
