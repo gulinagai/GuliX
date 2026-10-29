@@ -1180,5 +1180,75 @@ class ProdutoControllerTest {
         verify(produtoService).atualizarDescontoDestaque(eq(1), any(ProdutoDestaqueDTO.class));
     }
 
+    // removerDestaque(@PathVariable("produtoId") Integer produtoId)
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deveRetornar200AoRemoverDestaque() throws Exception {
+
+        // Arrange
+
+        ProdutoResponseDTO produtoEsperado = ProdutoFixture.produtoResponseDTO();
+        produtoEsperado.setDestaque(false);
+        produtoEsperado.setDesconto(new BigDecimal("0.00"));
+        produtoEsperado.setPreco(new BigDecimal("619.99"));
+
+        when(produtoService.removerDestaque(1)).thenReturn(produtoEsperado);
+
+        // Act
+
+        mockMvc.perform(delete("/api/v1/produtos/{produtoId}/destaque", 1))
+
+        // Assert
+
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(produtoEsperado.getId()))
+                .andExpect(jsonPath("$.preco").value(619.99))
+                .andExpect(jsonPath("$.destaque").value(false))
+                .andExpect(jsonPath("$.desconto").value(0.00));
+
+        verify(produtoService).removerDestaque(1);
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deveRetornar404AoRemoverDestaqueDeProdutoInexistente() throws Exception {
+
+        // Arrange
+
+        when(produtoService.removerDestaque(99))
+                .thenThrow(new RecursoNaoEncontradoException("Produto com id 99 não encontrado"));
+
+        // Act
+
+        mockMvc.perform(delete("/api/v1/produtos/{produtoId}/destaque", 99))
+
+        // Assert
+
+                .andExpect(status().isNotFound());
+
+        verify(produtoService).removerDestaque(99);
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void deveRetornar400QuandoProdutoNaoEstiverEmDestaqueAoRemover() throws Exception {
+
+        // Arrange
+
+        when(produtoService.removerDestaque(1))
+                .thenThrow(new RegraNegocioException("Produto não está em destaque"));
+
+        // Act
+
+        mockMvc.perform(delete("/api/v1/produtos/{produtoId}/destaque", 1))
+
+        // Assert
+
+                .andExpect(status().isBadRequest());
+
+        verify(produtoService).removerDestaque(1);
+    }
+
 }
 

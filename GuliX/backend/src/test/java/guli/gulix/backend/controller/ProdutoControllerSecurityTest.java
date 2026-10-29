@@ -346,6 +346,39 @@ public class ProdutoControllerSecurityTest {
         verifyNoInteractions(produtoService);
     }
 
+    // removerDestaque(@PathVariable("produtoId") Integer produtoId)
+
+    @Test
+    void deveRetornar401QuandoUsuarioNaoAutenticadoAoRemoverDestaque() throws Exception {
+
+        // Act
+
+        mockmvc.perform(delete("/api/v1/produtos/1/destaque"))
+
+                // Assert
+
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(produtoService);
+    }
+
+    @Test
+    void deveRetornar403QuandoUsuarioNaoAutorizadoAoRemoverDestaque() throws Exception {
+
+        // Act
+
+        mockmvc.perform(
+                        delete("/api/v1/produtos/1/destaque")
+                                .with(user("usuarioTeste").roles("USER"))
+                )
+
+                // Assert
+
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(produtoService);
+    }
+
     @TestConfiguration
     @EnableWebSecurity
     @EnableMethodSecurity

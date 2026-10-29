@@ -1137,4 +1137,84 @@ public class ProdutoServiceImplTest {
         verify(produtoRepository).findById(99);
         verifyNoInteractions(produtoMapper);
     }
+
+    // removerDestaque(Integer produtoId)
+
+    @Test
+    void deveRemoverDestaqueEZerarDesconto() {
+
+        // Arrange
+
+        produto.setDestaque(true);
+        produto.setDesconto(new BigDecimal("20.00"));
+        BigDecimal precoOriginal = produto.getPreco();
+
+        when(produtoRepository.findById(1)).thenReturn(Optional.of(produto));
+        when(produtoMapper.toDTO(produto)).thenReturn(produtoResponseDTO);
+
+        // Act
+
+        ProdutoResponseDTO resultado = produtoService.removerDestaque(1);
+
+        // Assert
+
+        assertSame(produtoResponseDTO, resultado);
+        assertEquals(Boolean.FALSE, produto.getDestaque());
+        assertEquals(new BigDecimal("0.00"), produto.getDesconto());
+        assertSame(precoOriginal, produto.getPreco());
+        assertEquals(0, new BigDecimal("619.99").compareTo(produto.getPreco()));
+        verify(produtoRepository).findById(1);
+        verify(produtoMapper).toDTO(produto);
+        verify(produtoRepository, never()).save(any());
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoProdutoNaoEncontradoAoRemoverDestaque() {
+
+        // Arrange
+
+        when(produtoRepository.findById(99)).thenReturn(Optional.empty());
+
+        // Act
+
+        RecursoNaoEncontradoException exception = assertThrows(
+                RecursoNaoEncontradoException.class,
+                () -> produtoService.removerDestaque(99)
+        );
+
+        // Assert
+
+        assertEquals("Produto com id 99 não encontrado", exception.getMessage());
+        verify(produtoRepository).findById(99);
+        verifyNoInteractions(produtoMapper);
+        verify(produtoRepository, never()).save(any());
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoProdutoNaoEstiverEmDestaqueAoRemover() {
+
+        // Arrange
+
+        produto.setDestaque(false);
+        produto.setDesconto(new BigDecimal("10.00"));
+        BigDecimal precoOriginal = produto.getPreco();
+
+        when(produtoRepository.findById(1)).thenReturn(Optional.of(produto));
+
+        // Act
+
+        RegraNegocioException exception = assertThrows(
+                RegraNegocioException.class,
+                () -> produtoService.removerDestaque(1)
+        );
+
+        // Assert
+
+        assertEquals("Produto não está em destaque", exception.getMessage());
+        assertEquals(Boolean.FALSE, produto.getDestaque());
+        assertEquals(0, new BigDecimal("10.00").compareTo(produto.getDesconto()));
+        assertSame(precoOriginal, produto.getPreco());
+        verify(produtoMapper, never()).toDTO(any());
+        verify(produtoRepository, never()).save(any());
+    }
 }

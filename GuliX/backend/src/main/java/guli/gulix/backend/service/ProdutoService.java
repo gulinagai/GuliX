@@ -28,4 +28,6 @@ public interface ProdutoService {
     ProdutoResponseDTO destacarProduto(Integer produtoId, ProdutoDestaqueDTO produtoDestaque);
 
     ProdutoResponseDTO atualizarDescontoDestaque(Integer produtoId, ProdutoDestaqueDTO produtoDestaque);
+
+    ProdutoResponseDTO removerDestaque(Integer produtoId);
 }

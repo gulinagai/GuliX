@@ -21,6 +21,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 @RequiredArgsConstructor
 @Service
 @Transactional
@@ -245,6 +247,25 @@ public class ProdutoServiceImpl implements ProdutoService {
         }
 
         produto.setDesconto(produtoDestaque.getDesconto());
+
+        return produtoMapper.toDTO(produto);
+    }
+
+    @Override
+    public ProdutoResponseDTO removerDestaque(Integer produtoId) {
+
+        Produto produto = produtoRepository.findById(produtoId)
+                .orElseThrow(() ->
+                        new RecursoNaoEncontradoException(
+                                "Produto com id " + produtoId + " não encontrado"
+                        ));
+
+        if (!Boolean.TRUE.equals(produto.getDestaque())) {
+            throw new RegraNegocioException("Produto não está em destaque");
+        }
+
+        produto.setDestaque(false);
+        produto.setDesconto(new BigDecimal("0.00"));
 
         return produtoMapper.toDTO(produto);
     }

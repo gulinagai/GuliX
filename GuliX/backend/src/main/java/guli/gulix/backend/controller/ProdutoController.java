@@ -472,4 +472,61 @@ public class ProdutoController {
         return ResponseEntity.ok(produtoAtualizado);
     }
 
+    @Operation(
+            summary = "Remover destaque do produto",
+            description = "Remove o destaque de um produto e zera o percentual de desconto. O produto e o preço original não são alterados. Esta operação requer autenticação com perfil ADMIN."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Destaque removido com sucesso."
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "O produto não está em destaque ou o identificador é inválido.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Credenciais inválidas ou autenticação não realizada.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "O usuário autenticado não possui permissão de administrador.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Produto não encontrado.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @DeleteMapping("/{produtoId}/destaque")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProdutoResponseDTO> removerDestaque(
+            @Parameter(
+                    description = "Identificador único do produto.",
+                    example = "1"
+            )
+            @PathVariable("produtoId") Integer produtoId) {
+
+        ProdutoResponseDTO produto = produtoService.removerDestaque(produtoId);
+
+        return ResponseEntity.ok(produto);
+    }
+
 }
