@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProdutoService {
-    Page<ProdutoResponseDTO> getAllProduto(String nome, Integer categoriaId, Integer marcarId, Pageable pageable);
+    Page<ProdutoResponseDTO> getAllProduto(String nome, Integer categoriaId, Integer marcarId, Boolean destaque, Pageable pageable);
 
     ProdutoResponseDTO getProdutoById(Integer produtoId);
 

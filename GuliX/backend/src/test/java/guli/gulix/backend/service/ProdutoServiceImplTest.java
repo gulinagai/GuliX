@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -54,6 +55,9 @@ public class ProdutoServiceImplTest {
 
     @Mock
     private ProdutoMapper produtoMapper;
+
+    @Spy
+    private PrecoPromocionalService precoPromocionalService = new PrecoPromocionalService();
 
     @InjectMocks
     private ProdutoServiceImpl produtoService;
@@ -109,6 +113,7 @@ public class ProdutoServiceImplTest {
                         null,
                         null,
                         null,
+                        null,
                         pageable
                 );
 
@@ -157,6 +162,7 @@ public class ProdutoServiceImplTest {
                             null,
                             null,
                             null,
+                            null,
                             pageable
                     );
 
@@ -202,6 +208,7 @@ public class ProdutoServiceImplTest {
         Page<ProdutoResponseDTO> resultado =
                 produtoService.getAllProduto(
                         nome,
+                        null,
                         null,
                         null,
                         pageable
@@ -254,6 +261,7 @@ public class ProdutoServiceImplTest {
                 null,
                 categoriaId,
                 null,
+                null,
                 pageable
         );
 
@@ -305,6 +313,7 @@ public class ProdutoServiceImplTest {
                 null,
                 null,
                 marcaId,
+                null,
                 pageable
         );
 
@@ -357,6 +366,7 @@ public class ProdutoServiceImplTest {
                 nome,
                 categoriaId,
                 marcaId,
+                null,
                 pageable
         );
 
@@ -383,6 +393,47 @@ public class ProdutoServiceImplTest {
         verify(produtoMapper).toDTO(produto);
     }
 
+    @Test
+    void deveAplicarFiltroPorDestaque() {
+
+        // Arrange
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<Produto> pageProdutos = new PageImpl<>(
+                List.of(produto),
+                pageable,
+                1
+        );
+
+        when(produtoRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(pageProdutos);
+        when(produtoMapper.toDTO(produto)).thenReturn(produtoResponseDTO);
+
+        // Act
+
+        Page<ProdutoResponseDTO> resultado = produtoService.getAllProduto(
+                null,
+                null,
+                null,
+                true,
+                pageable
+        );
+
+        // Assert
+
+        assertEquals(1, resultado.getTotalElements());
+        assertEquals(Boolean.TRUE, resultado.getContent().get(0).getDestaque());
+        assertEquals(new BigDecimal("557.99"), resultado.getContent().get(0).getPrecoFinal());
+
+        ArgumentCaptor<Specification<Produto>> specificationArgumentCaptor =
+                ArgumentCaptor.forClass(Specification.class);
+
+        verify(produtoRepository).findAll(
+                specificationArgumentCaptor.capture(), eq(pageable)
+        );
+
+        assertNotNull(specificationArgumentCaptor.getValue());
+    }
 
     // getProdutoById()
 
@@ -419,6 +470,67 @@ public class ProdutoServiceImplTest {
         verify(estoqueService)
                 .getEstoqueByProdutoId(produto.getId());
 
+        assertEquals(new BigDecimal("619.99"), resultado.getPreco());
+        assertEquals(new BigDecimal("10.00"), resultado.getDesconto());
+        assertEquals(new BigDecimal("557.99"), resultado.getPrecoFinal());
+        assertEquals(Boolean.TRUE, resultado.getDestaque());
+        assertEquals(0, new BigDecimal("619.99").compareTo(produto.getPreco()));
+    }
+
+    @Test
+    void deveExporPrecoOriginalQuandoProdutoEmDestaqueNaoTiverDesconto() {
+
+        // Arrange
+
+        produto.setDesconto(new BigDecimal("0.00"));
+        produtoResponseDTO.setDesconto(new BigDecimal("10.00"));
+        BigDecimal precoOriginal = produto.getPreco();
+
+        when(produtoRepository.findById(1)).thenReturn(Optional.of(produto));
+        when(produtoMapper.toDTO(produto)).thenReturn(produtoResponseDTO);
+        when(estoqueService.getEstoqueByProdutoId(1)).thenReturn(EstoqueFixture.estoqueResponseDTO());
+
+        // Act
+
+        ProdutoResponseDTO resultado = produtoService.getProdutoById(1);
+
+        // Assert
+
+        assertEquals(Boolean.TRUE, resultado.getDestaque());
+        assertEquals(new BigDecimal("0.00"), resultado.getDesconto());
+        assertEquals(new BigDecimal("619.99"), resultado.getPrecoFinal());
+        assertEquals(new BigDecimal("619.99"), resultado.getPreco());
+        assertSame(precoOriginal, produto.getPreco());
+    }
+
+    @Test
+    void deveIgnorarDescontoPersistidoQuandoProdutoNaoEstiverEmDestaque() {
+
+        // Arrange
+
+        produto.setDestaque(false);
+        produto.setDesconto(new BigDecimal("15.00"));
+        produtoResponseDTO.setDestaque(false);
+        produtoResponseDTO.setDesconto(new BigDecimal("15.00"));
+        BigDecimal precoOriginal = produto.getPreco();
+
+        when(produtoRepository.findById(1)).thenReturn(Optional.of(produto));
+        when(produtoMapper.toDTO(produto)).thenReturn(produtoResponseDTO);
+        when(estoqueService.getEstoqueByProdutoId(1)).thenReturn(EstoqueFixture.estoqueResponseDTO());
+
+        // Act
+
+        ProdutoResponseDTO resultado = produtoService.getProdutoById(1);
+
+        // Assert
+
+        assertEquals(Boolean.FALSE, produto.getDestaque());
+        assertEquals(new BigDecimal("15.00"), produto.getDesconto());
+        assertEquals(Boolean.FALSE, resultado.getDestaque());
+        assertEquals(new BigDecimal("0.00"), resultado.getDesconto());
+        assertEquals(new BigDecimal("619.99"), resultado.getPreco());
+        assertEquals(new BigDecimal("619.99"), resultado.getPrecoFinal());
+        assertSame(precoOriginal, produto.getPreco());
     }
 
     @Test

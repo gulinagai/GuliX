@@ -150,6 +150,40 @@ class PagamentoServiceImplTest {
     }
 
     @Test
+    void deveAplicarDescontoDeBoletoSobreTotalQueJaIncluiDescontoPromocional() {
+        pedido.setSubtotal(new BigDecimal("1510.00"));
+        pedido.setValorFrete(new BigDecimal("40.00"));
+        pedido.setTotal(new BigDecimal("1550.00"));
+
+        PedidoCreateDTO pedidoCreateDTO = PedidoFixture.pedidoCreateDTO();
+        pedidoCreateDTO.setMetodoPagamento(MetodoPagamento.BOLETO);
+
+        Pagamento pagamentoSalvo = capturarPagamentoCriado(pedidoCreateDTO);
+
+        assertEquals(0, new BigDecimal("1550.00").compareTo(pagamentoSalvo.getValorOriginal()));
+        assertEquals(0, new BigDecimal("155.00").compareTo(pagamentoSalvo.getDesconto()));
+        assertEquals(0, new BigDecimal("1395.00").compareTo(pagamentoSalvo.getValorFinal()));
+        assertEquals(0, BigDecimal.ZERO.compareTo(pagamentoSalvo.getValorJuros()));
+    }
+
+    @Test
+    void deveAplicarJurosDeCartaoSobreTotalQueJaIncluiDescontoPromocional() {
+        pedido.setSubtotal(new BigDecimal("1510.00"));
+        pedido.setValorFrete(new BigDecimal("40.00"));
+        pedido.setTotal(new BigDecimal("1550.00"));
+
+        PedidoCreateDTO pedidoCreateDTO = PedidoFixture.pedidoCreateDTO();
+        pedidoCreateDTO.setNumeroParcelas(7);
+
+        Pagamento pagamentoSalvo = capturarPagamentoCriado(pedidoCreateDTO);
+
+        assertEquals(0, BigDecimal.ZERO.compareTo(pagamentoSalvo.getDesconto()));
+        assertEquals(0, new BigDecimal("31.00").compareTo(pagamentoSalvo.getValorJuros()));
+        assertEquals(0, new BigDecimal("1581.00").compareTo(pagamentoSalvo.getValorFinal()));
+        assertEquals(0, new BigDecimal("225.86").compareTo(pagamentoSalvo.getValorParcela()));
+    }
+
+    @Test
     void deveLancarExcecaoQuandoCartaoNaoInformarParcelas() {
         PedidoCreateDTO pedidoCreateDTO = PedidoFixture.pedidoCreateDTO();
         pedidoCreateDTO.setNumeroParcelas(null);

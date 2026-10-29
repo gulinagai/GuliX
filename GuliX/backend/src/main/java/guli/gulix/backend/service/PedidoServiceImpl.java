@@ -31,8 +31,8 @@ public class PedidoServiceImpl implements PedidoService {
     private final PedidoMapper pedidoMapper;
     private final CarrinhoRepository carrinhoRepository;
     private final EnderecoRepository enderecoRepository;
-    private final CarrinhoService carrinhoService;
     private final PagamentoService pagamentoService;
+    private final PrecoPromocionalService precoPromocionalService;
     private final EstoqueService estoqueService;
     private final CalculoFreteService calculoFreteService;
 
@@ -109,7 +109,7 @@ public class PedidoServiceImpl implements PedidoService {
         newPedido.setUsuario(carrinho.getUsuario());
         newPedido.setStatusPedido(StatusPedido.PENDENTE);
 
-        BigDecimal subtotal = carrinhoService.calcularTotal(carrinho);
+        BigDecimal subtotal = calcularSubtotalPromocional(carrinho);
 
         newPedido.setSubtotal(subtotal);
 
@@ -141,7 +141,9 @@ public class PedidoServiceImpl implements PedidoService {
 
                     itemPedido.setProduto(itemCarrinho.getProduto());
                     itemPedido.setQuantidade(itemCarrinho.getQuantidade());
-                    itemPedido.setPrecoUnitario(itemCarrinho.getProduto().getPreco());
+                    itemPedido.setPrecoUnitario(
+                            precoPromocionalService.precoUnitario(itemCarrinho.getProduto())
+                    );
                     itemPedido.setPedido(newPedido);
 
 
@@ -223,6 +225,17 @@ public class PedidoServiceImpl implements PedidoService {
         return pedidoMapper.toDTO(pedido);
     }
 
+
+    private BigDecimal calcularSubtotalPromocional(Carrinho carrinho) {
+        if (carrinho.getItens() == null || carrinho.getItens().isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        return carrinho.getItens().stream()
+                .map(item -> precoPromocionalService.precoUnitario(item.getProduto())
+                        .multiply(BigDecimal.valueOf(item.getQuantidade())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 
     private void validatePedidoOwner(Pedido pedido, Usuario usuario) {
         if (!pedido.getUsuario().getId().equals(usuario.getId())) {

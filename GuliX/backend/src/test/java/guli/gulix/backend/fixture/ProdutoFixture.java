@@ -97,6 +97,7 @@ public final class ProdutoFixture {
         dto.setMarcaId(1);
         dto.setDestaque(true);
         dto.setDesconto(new BigDecimal("10.00"));
+        dto.setPrecoFinal(new BigDecimal("557.99"));
 
         return dto;
     }

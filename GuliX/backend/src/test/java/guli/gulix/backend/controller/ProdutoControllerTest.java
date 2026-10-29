@@ -97,6 +97,7 @@ class ProdutoControllerTest {
                 isNull(),
                 isNull(),
                 isNull(),
+                isNull(),
                 any(Pageable.class)
         )).thenReturn(pageProdutos);
 
@@ -120,6 +121,7 @@ class ProdutoControllerTest {
                 .andExpect(jsonPath("$.content[0].marcaId").value(produtoEsperado.getMarcaId()))
                 .andExpect(jsonPath("$.content[0].destaque").value(produtoEsperado.getDestaque()))
                 .andExpect(jsonPath("$.content[0].desconto").value(produtoEsperado.getDesconto().doubleValue()))
+                .andExpect(jsonPath("$.content[0].precoFinal").value(produtoEsperado.getPrecoFinal().doubleValue()))
                 .andExpect(jsonPath("$.totalElements").value(1))
                 .andExpect(jsonPath("$.totalPages").value(1))
                 .andExpect(jsonPath("$.content[0].estoque").exists())
@@ -133,6 +135,7 @@ class ProdutoControllerTest {
                         .value(produtoEsperado.getEstoque().getEstoqueDisponivel()));
 
         verify(produtoService).getAllProduto(
+                isNull(),
                 isNull(),
                 isNull(),
                 isNull(),
@@ -158,6 +161,7 @@ class ProdutoControllerTest {
                 isNull(),
                 isNull(),
                 isNull(),
+                isNull(),
                 any(Pageable.class)
         )).thenReturn(pageProdutos);
 
@@ -178,6 +182,7 @@ class ProdutoControllerTest {
 
 
         verify(produtoService).getAllProduto(
+                isNull(),
                 isNull(),
                 isNull(),
                 isNull(),
@@ -206,6 +211,7 @@ class ProdutoControllerTest {
                 eq(nome),
                 isNull(),
                 isNull(),
+                isNull(),
                 any(Pageable.class)
         )).thenReturn(pageProdutos);
 
@@ -228,6 +234,7 @@ class ProdutoControllerTest {
 
         verify(produtoService).getAllProduto(
                 eq(nome),
+                isNull(),
                 isNull(),
                 isNull(),
                 any(Pageable.class)
@@ -255,6 +262,7 @@ class ProdutoControllerTest {
                 isNull(),
                 eq(categoriaId),
                 isNull(),
+                isNull(),
                 any(Pageable.class)
         )).thenReturn(pageProdutos);
 
@@ -278,6 +286,7 @@ class ProdutoControllerTest {
         verify(produtoService).getAllProduto(
                 isNull(),
                 eq(categoriaId),
+                isNull(),
                 isNull(),
                 any(Pageable.class)
         );
@@ -304,6 +313,7 @@ class ProdutoControllerTest {
                 isNull(),
                 isNull(),
                 eq(marcaId),
+                isNull(),
                 any(Pageable.class)
         )).thenReturn(pageProdutos);
 
@@ -328,6 +338,7 @@ class ProdutoControllerTest {
                 isNull(),
                 isNull(),
                 eq(marcaId),
+                isNull(),
                 any(Pageable.class)
         );
     }
@@ -355,6 +366,7 @@ class ProdutoControllerTest {
                 eq(nome),
                 eq(categoriaId),
                 eq(marcaId),
+                isNull(),
                 any(Pageable.class)
         )).thenReturn(pageProdutos);
 
@@ -383,6 +395,56 @@ class ProdutoControllerTest {
                 eq(nome),
                 eq(categoriaId),
                 eq(marcaId),
+                isNull(),
+                any(Pageable.class)
+        );
+    }
+
+    @Test
+    void deveRetornar200AoBuscarSomenteProdutosEmDestaque() throws Exception {
+
+        // Arrange
+
+        ProdutoResponseDTO produtoEsperado = ProdutoFixture.produtoResponseDTO();
+
+        Page<ProdutoResponseDTO> pageProdutos = new PageImpl<>(
+                List.of(produtoEsperado),
+                PageRequest.of(0, 10),
+                1
+        );
+
+        when(produtoService.getAllProduto(
+                isNull(),
+                isNull(),
+                isNull(),
+                eq(true),
+                any(Pageable.class)
+        )).thenReturn(pageProdutos);
+
+        // Act
+
+        mockMvc.perform(
+                        get("/api/v1/produtos")
+                                .param("page", "0")
+                                .param("size", "10")
+                                .param("destaque", "true")
+                )
+
+                // Assert
+
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(produtoEsperado.getId()))
+                .andExpect(jsonPath("$.content[0].preco").value(produtoEsperado.getPreco().doubleValue()))
+                .andExpect(jsonPath("$.content[0].desconto").value(produtoEsperado.getDesconto().doubleValue()))
+                .andExpect(jsonPath("$.content[0].precoFinal").value(produtoEsperado.getPrecoFinal().doubleValue()))
+                .andExpect(jsonPath("$.content[0].destaque").value(true))
+                .andExpect(jsonPath("$.totalElements").value(1));
+
+        verify(produtoService).getAllProduto(
+                isNull(),
+                isNull(),
+                isNull(),
+                eq(true),
                 any(Pageable.class)
         );
     }
@@ -422,7 +484,8 @@ class ProdutoControllerTest {
                 .andExpect(jsonPath("$.categoriaId").value(produtoEsperado.getCategoriaId()))
                 .andExpect(jsonPath("$.marcaId").value(produtoEsperado.getMarcaId()))
                 .andExpect(jsonPath("$.destaque").value(produtoEsperado.getDestaque()))
-                .andExpect(jsonPath("$.desconto").value(produtoEsperado.getDesconto().doubleValue()));
+                .andExpect(jsonPath("$.desconto").value(produtoEsperado.getDesconto().doubleValue()))
+                .andExpect(jsonPath("$.precoFinal").value(produtoEsperado.getPrecoFinal().doubleValue()));
 
         verify(produtoService).getProdutoById(1);
     }

@@ -69,10 +69,15 @@ public class ProdutoController {
             )
             @RequestParam(required = false) Integer marcaId,
 
+            @Parameter(
+                    description = "Filtra produtos pelo indicador de destaque. true retorna somente produtos em destaque.",
+                    example = "true"
+            )
+            @RequestParam(required = false) Boolean destaque,
 
             Pageable pageable
     ) {
-        return ResponseEntity.ok(produtoService.getAllProduto(nome, categoriaId, marcaId, pageable));
+        return ResponseEntity.ok(produtoService.getAllProduto(nome, categoriaId, marcaId, destaque, pageable));
     }
 
     @Operation(

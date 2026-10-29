@@ -34,10 +34,11 @@ public class ProdutoServiceImpl implements ProdutoService {
     private final ProdutoMapper produtoMapper;
     private final EstoqueService estoqueService;
     private final EstoqueRepository estoqueRepository;
+    private final PrecoPromocionalService precoPromocionalService;
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProdutoResponseDTO> getAllProduto(String nome, Integer categoriaId, Integer marcaId, Pageable pageable) {
+    public Page<ProdutoResponseDTO> getAllProduto(String nome, Integer categoriaId, Integer marcaId, Boolean destaque, Pageable pageable) {
 
         Specification<Produto> specification = (root, query, criteriaBuilder) -> null;
 
@@ -59,10 +60,16 @@ public class ProdutoServiceImpl implements ProdutoService {
             );
         }
 
+        if (destaque != null) {
+            specification = specification.and(
+                    ProdutoSpecification.destaqueEquals(destaque)
+            );
+        }
+
         Page<Produto> produtos = produtoRepository.findAll(specification, pageable);
 
         return produtos.map(produto -> {
-                    ProdutoResponseDTO response = produtoMapper.toDTO(produto);
+                    ProdutoResponseDTO response = montarResposta(produto);
                     EstoqueResponseDTO estoque = estoqueService.getEstoqueByProdutoId(produto.getId());
 
                     response.setEstoque(estoque);
@@ -83,7 +90,7 @@ public class ProdutoServiceImpl implements ProdutoService {
                          "Produto com id " + produtoId + " não encontrado"
                         ));
 
-        ProdutoResponseDTO response = produtoMapper.toDTO(produto);
+        ProdutoResponseDTO response = montarResposta(produto);
         EstoqueResponseDTO estoque = estoqueService.getEstoqueByProdutoId(produto.getId());
 
         response.setEstoque(estoque);
@@ -116,7 +123,7 @@ public class ProdutoServiceImpl implements ProdutoService {
 
         estoqueService.createNewEstoque(produto);
 
-        ProdutoResponseDTO response = produtoMapper.toDTO(produtoRepository.save(produto));
+        ProdutoResponseDTO response = montarResposta(produtoRepository.save(produto));
 
         EstoqueResponseDTO estoque = estoqueService.getEstoqueByProdutoId(produto.getId());
 
@@ -176,7 +183,7 @@ public class ProdutoServiceImpl implements ProdutoService {
             produto.setMarca(marca);
         }
 
-        return produtoMapper.toDTO(produto);
+        return montarResposta(produto);
 
     }
 
@@ -211,7 +218,7 @@ public class ProdutoServiceImpl implements ProdutoService {
             produto.setMarca(marca);
         }
 
-        return produtoMapper.toDTO(produto);
+        return montarResposta(produto);
     }
 
     @Override
@@ -230,7 +237,7 @@ public class ProdutoServiceImpl implements ProdutoService {
         produto.setDestaque(true);
         produto.setDesconto(produtoDestaque.getDesconto());
 
-        return produtoMapper.toDTO(produto);
+        return montarResposta(produto);
     }
 
     @Override
@@ -248,7 +255,7 @@ public class ProdutoServiceImpl implements ProdutoService {
 
         produto.setDesconto(produtoDestaque.getDesconto());
 
-        return produtoMapper.toDTO(produto);
+        return montarResposta(produto);
     }
 
     @Override
@@ -267,7 +274,14 @@ public class ProdutoServiceImpl implements ProdutoService {
         produto.setDestaque(false);
         produto.setDesconto(new BigDecimal("0.00"));
 
-        return produtoMapper.toDTO(produto);
+        return montarResposta(produto);
+    }
+
+    private ProdutoResponseDTO montarResposta(Produto produto) {
+        ProdutoResponseDTO response = produtoMapper.toDTO(produto);
+        response.setDesconto(precoPromocionalService.percentualEfetivo(produto));
+        response.setPrecoFinal(precoPromocionalService.precoUnitario(produto));
+        return response;
     }
 
 }
