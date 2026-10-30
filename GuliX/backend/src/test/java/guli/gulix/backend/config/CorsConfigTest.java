@@ -96,6 +96,14 @@ class CorsConfigTest {
                 .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, ORIGEM_VITE));
     }
 
+    @Test
+    void deveLiberarImagemDeProdutoSemAutenticacao() throws Exception {
+        mockMvc.perform(get("/imagens/produtos/gabinete-gamer-antec-cannon-full-tower-lateral-de-vidro-preto-cannon.jpg")
+                        .header(HttpHeaders.ORIGIN, ORIGEM_VITE))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, ORIGEM_VITE));
+    }
+
     @TestConfiguration
     @EnableWebSecurity
     static class WebSecurity {
