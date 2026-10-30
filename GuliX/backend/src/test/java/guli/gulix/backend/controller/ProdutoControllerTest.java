@@ -509,6 +509,34 @@ class ProdutoControllerTest {
         verify(produtoService).getProdutoById(0);
     }
 
+    @Test
+    void deveRetornar200AoConsultarFaixaDePrecos() throws Exception {
+        when(produtoService.getFaixaPreco()).thenReturn(
+                new FaixaPrecoResponseDTO(new BigDecimal("49.90"), new BigDecimal("5999.90"))
+        );
+
+        mockMvc.perform(get("/api/v1/produtos/faixa-precos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.menorPreco").value(49.90))
+                .andExpect(jsonPath("$.maiorPreco").value(5999.90));
+
+        verify(produtoService).getFaixaPreco();
+        verify(produtoService, never()).getProdutoById(any());
+    }
+
+    @Test
+    void deveRetornar404QuandoNaoExistirProdutoParaFaixaDePrecos() throws Exception {
+        when(produtoService.getFaixaPreco()).thenThrow(
+                new RecursoNaoEncontradoException("Nenhum produto disponível para comercialização")
+        );
+
+        mockMvc.perform(get("/api/v1/produtos/faixa-precos"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Nenhum produto disponível para comercialização"));
+
+        verify(produtoService).getFaixaPreco();
+    }
+
     // createNewProduto(@RequestBody ProdutoCreateDTO produtoRequest)
 
 

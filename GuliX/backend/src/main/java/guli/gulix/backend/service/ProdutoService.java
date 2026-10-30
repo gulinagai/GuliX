@@ -1,5 +1,6 @@
 package guli.gulix.backend.service;
 
+import guli.gulix.backend.dto.FaixaPrecoResponseDTO;
 import guli.gulix.backend.dto.ProdutoCreateDTO;
 import guli.gulix.backend.dto.ProdutoDestaqueDTO;
 import guli.gulix.backend.dto.ProdutoPatchDTO;
@@ -14,6 +15,8 @@ import java.util.Optional;
 
 public interface ProdutoService {
     Page<ProdutoResponseDTO> getAllProduto(String nome, Integer categoriaId, Integer marcarId, Boolean destaque, Pageable pageable);
+
+    FaixaPrecoResponseDTO getFaixaPreco();
 
     ProdutoResponseDTO getProdutoById(Integer produtoId);
 
