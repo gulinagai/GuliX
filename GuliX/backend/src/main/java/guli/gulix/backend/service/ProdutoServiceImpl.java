@@ -12,6 +12,7 @@ import guli.gulix.backend.mapper.ProdutoMapper;
 import guli.gulix.backend.repository.CategoriaRepository;
 import guli.gulix.backend.repository.EstoqueRepository;
 import guli.gulix.backend.repository.MarcaRepository;
+import guli.gulix.backend.repository.PrecoComercial;
 import guli.gulix.backend.repository.ProdutoRepository;
 import guli.gulix.backend.specification.ProdutoSpecification;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -79,6 +81,42 @@ public class ProdutoServiceImpl implements ProdutoService {
 
         );
 
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public FaixaPrecoResponseDTO getFaixaPreco() {
+        List<PrecoComercial> precos = produtoRepository.findPrecosComercializaveis();
+
+        if (precos.isEmpty()) {
+            throw new RecursoNaoEncontradoException(
+                    "Nenhum produto disponível para comercialização"
+            );
+        }
+
+        BigDecimal menorPreco = null;
+        BigDecimal maiorPreco = null;
+
+        for (PrecoComercial preco : precos) {
+            BigDecimal precoEfetivo = precoPromocionalService.precoUnitario(produtoParaCalculo(preco));
+
+            if (menorPreco == null || precoEfetivo.compareTo(menorPreco) < 0) {
+                menorPreco = precoEfetivo;
+            }
+            if (maiorPreco == null || precoEfetivo.compareTo(maiorPreco) > 0) {
+                maiorPreco = precoEfetivo;
+            }
+        }
+
+        return new FaixaPrecoResponseDTO(menorPreco, maiorPreco);
+    }
+
+    private Produto produtoParaCalculo(PrecoComercial preco) {
+        Produto produto = new Produto();
+        produto.setPreco(preco.preco());
+        produto.setDestaque(preco.destaque());
+        produto.setDesconto(preco.desconto());
+        return produto;
     }
 
     @Override

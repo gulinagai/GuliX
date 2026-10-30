@@ -11,6 +11,7 @@ import guli.gulix.backend.mapper.ProdutoMapper;
 import guli.gulix.backend.repository.CategoriaRepository;
 import guli.gulix.backend.repository.EstoqueRepository;
 import guli.gulix.backend.repository.MarcaRepository;
+import guli.gulix.backend.repository.PrecoComercial;
 import guli.gulix.backend.repository.ProdutoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -1328,5 +1329,32 @@ public class ProdutoServiceImplTest {
         assertSame(precoOriginal, produto.getPreco());
         verify(produtoMapper, never()).toDTO(any());
         verify(produtoRepository, never()).save(any());
+    }
+
+    @Test
+    void deveRetornarMenorEMaiorPrecoEfetivoDosProdutosDisponiveis() {
+        when(produtoRepository.findPrecosComercializaveis()).thenReturn(List.of(
+                new PrecoComercial(new BigDecimal("1000.00"), true, new BigDecimal("15.00")),
+                new PrecoComercial(new BigDecimal("100.00"), false, new BigDecimal("50.00")),
+                new PrecoComercial(new BigDecimal("10.01"), true, new BigDecimal("15.00"))
+        ));
+
+        FaixaPrecoResponseDTO faixa = produtoService.getFaixaPreco();
+
+        assertEquals(0, new BigDecimal("8.51").compareTo(faixa.getMenorPreco()));
+        assertEquals(0, new BigDecimal("850.00").compareTo(faixa.getMaiorPreco()));
+        verify(produtoRepository).findPrecosComercializaveis();
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoNaoExistirProdutoDisponivelParaFaixaDePreco() {
+        when(produtoRepository.findPrecosComercializaveis()).thenReturn(List.of());
+
+        RecursoNaoEncontradoException exception = assertThrows(
+                RecursoNaoEncontradoException.class,
+                () -> produtoService.getFaixaPreco()
+        );
+
+        assertEquals("Nenhum produto disponível para comercialização", exception.getMessage());
     }
 }

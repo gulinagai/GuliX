@@ -81,6 +81,29 @@ public class ProdutoController {
     }
 
     @Operation(
+            summary = "Consultar faixa de preços",
+            description = "Retorna o menor e o maior preço efetivo de venda entre os produtos com estoque disponível. O preço considera o desconto promocional já aplicado aos produtos em destaque."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Faixa de preços encontrada com sucesso."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Nenhum produto disponível para comercialização.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @GetMapping("/faixa-precos")
+    public ResponseEntity<FaixaPrecoResponseDTO> getFaixaPreco() {
+        return ResponseEntity.ok(produtoService.getFaixaPreco());
+    }
+
+    @Operation(
             summary = "Buscar produto por ID",
             description = "Retorna os dados de um produto específico a partir do seu identificador."
     )
