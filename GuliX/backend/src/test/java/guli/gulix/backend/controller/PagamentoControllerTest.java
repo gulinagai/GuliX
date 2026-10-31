@@ -1,5 +1,6 @@
 package guli.gulix.backend.controller;
 
+import guli.gulix.backend.dto.CondicoesPagamentoResponseDTO;
 import guli.gulix.backend.dto.PagamentoResponseDTO;
 import guli.gulix.backend.entity.Usuario;
 import guli.gulix.backend.exception.RecursoNaoEncontradoException;
@@ -23,6 +24,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -127,6 +129,30 @@ class PagamentoControllerTest {
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(pagamentoService);
+    }
+
+    @Test
+    void deveRetornar200AoConsultarCondicoesDeParcelamentoDoProduto() throws Exception {
+        when(pagamentoService.getCondicoesParcelamento(7))
+                .thenReturn(new CondicoesPagamentoResponseDTO(6, new BigDecimal("833.33")));
+
+        mockMvc.perform(requisicaoAutenticada(get("/api/v1/pagamentos/produtos/{produtoId}", 7)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantidadeParcelas").value(6))
+                .andExpect(jsonPath("$.valorParcela").value(833.33));
+
+        verify(pagamentoService).getCondicoesParcelamento(7);
+    }
+
+    @Test
+    void deveRetornar404QuandoProdutoNaoExistirAoConsultarParcelamento() throws Exception {
+        doThrow(new RecursoNaoEncontradoException("Produto com id 99 não encontrado"))
+                .when(pagamentoService).getCondicoesParcelamento(99);
+
+        mockMvc.perform(requisicaoAutenticada(get("/api/v1/pagamentos/produtos/{produtoId}", 99)))
+                .andExpect(status().isNotFound());
+
+        verify(pagamentoService).getCondicoesParcelamento(99);
     }
 
     private void autenticar(Usuario usuario) {

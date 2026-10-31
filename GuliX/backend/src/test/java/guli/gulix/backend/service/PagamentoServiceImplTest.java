@@ -1,9 +1,12 @@
 package guli.gulix.backend.service;
 
+import guli.gulix.backend.config.ParcelamentoConfig;
+import guli.gulix.backend.dto.CondicoesPagamentoResponseDTO;
 import guli.gulix.backend.dto.PagamentoResponseDTO;
 import guli.gulix.backend.dto.PedidoCreateDTO;
 import guli.gulix.backend.entity.Pagamento;
 import guli.gulix.backend.entity.Pedido;
+import guli.gulix.backend.entity.Produto;
 import guli.gulix.backend.entity.Usuario;
 import guli.gulix.backend.entity.enums.GatewayPagamento;
 import guli.gulix.backend.entity.enums.MetodoPagamento;
@@ -17,12 +20,14 @@ import guli.gulix.backend.gateway.pagamento.GatewayPagamentoService;
 import guli.gulix.backend.gateway.pagamento.ResultadoCheckout;
 import guli.gulix.backend.mapper.PagamentoMapper;
 import guli.gulix.backend.repository.PagamentoRepository;
+import guli.gulix.backend.repository.ProdutoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -42,6 +47,15 @@ class PagamentoServiceImplTest {
 
     @Mock
     private GatewayPagamentoService gatewayPagamentoService;
+
+    @Spy
+    private ParcelamentoConfig parcelamentoConfig = new ParcelamentoConfig();
+
+    @Mock
+    private ProdutoRepository produtoRepository;
+
+    @Mock
+    private PrecoPromocionalService precoPromocionalService;
 
     @InjectMocks
     private PagamentoServiceImpl pagamentoService;
@@ -302,6 +316,84 @@ class PagamentoServiceImplTest {
         assertEquals("Acesso negado", exception.getMessage());
         verify(pagamentoRepository).findById(1);
         verifyNoInteractions(pagamentoMapper, gatewayPagamentoService);
+    }
+
+    @Test
+    void deveCalcularParcelasSemJurosPeloPrecoOriginalQuandoProdutoNaoEstiverEmDestaque() {
+        Produto produto = produtoComPreco("4999.98", false, "10.00");
+        when(produtoRepository.findById(1)).thenReturn(Optional.of(produto));
+        when(precoPromocionalService.precoUnitario(produto)).thenAnswer(invocation ->
+                new PrecoPromocionalService().precoUnitario(invocation.getArgument(0))
+        );
+
+        CondicoesPagamentoResponseDTO resultado = pagamentoService.getCondicoesParcelamento(1);
+
+        assertEquals(6, resultado.getQuantidadeParcelas());
+        assertEquals(0, new BigDecimal("833.33").compareTo(resultado.getValorParcela()));
+        verify(precoPromocionalService).precoUnitario(produto);
+    }
+
+    @Test
+    void deveCalcularParcelasSemJurosPeloPrecoPromocionalQuandoProdutoEstiverEmDestaque() {
+        Produto produto = produtoComPreco("4999.98", true, "10.00");
+        when(produtoRepository.findById(1)).thenReturn(Optional.of(produto));
+        when(precoPromocionalService.precoUnitario(produto)).thenAnswer(invocation ->
+                new PrecoPromocionalService().precoUnitario(invocation.getArgument(0))
+        );
+
+        CondicoesPagamentoResponseDTO resultado = pagamentoService.getCondicoesParcelamento(1);
+
+        assertEquals(6, resultado.getQuantidadeParcelas());
+        assertEquals(0, new BigDecimal("750.00").compareTo(resultado.getValorParcela()));
+    }
+
+    @Test
+    void deveUsarAQuantidadeCentralizadaDeParcelasSemJuros() {
+        when(parcelamentoConfig.getQuantidadeMaximaParcelasSemJuros()).thenReturn(4);
+        Produto produto = produtoComPreco("4999.98", false, null);
+        when(produtoRepository.findById(1)).thenReturn(Optional.of(produto));
+        when(precoPromocionalService.precoUnitario(produto)).thenAnswer(invocation ->
+                new PrecoPromocionalService().precoUnitario(invocation.getArgument(0))
+        );
+
+        CondicoesPagamentoResponseDTO resultado = pagamentoService.getCondicoesParcelamento(1);
+
+        assertEquals(4, resultado.getQuantidadeParcelas());
+        assertEquals(0, new BigDecimal("1250.00").compareTo(resultado.getValorParcela()));
+
+        PedidoCreateDTO pedidoCreateDTO = PedidoFixture.pedidoCreateDTO();
+        pedidoCreateDTO.setNumeroParcelas(4);
+        Pagamento semJuros = capturarPagamentoCriado(pedidoCreateDTO);
+        assertEquals(0, BigDecimal.ZERO.compareTo(semJuros.getValorJuros()));
+        assertEquals(0, new BigDecimal("316.47").compareTo(semJuros.getValorParcela()));
+
+        clearInvocations(pagamentoRepository);
+        pedidoCreateDTO.setNumeroParcelas(5);
+        Pagamento comJuros = capturarPagamentoCriado(pedidoCreateDTO);
+        assertEquals(0, new BigDecimal("25.32").compareTo(comJuros.getValorJuros()));
+        assertEquals(0, new BigDecimal("258.24").compareTo(comJuros.getValorParcela()));
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoProdutoNaoExistirAoConsultarParcelamento() {
+        when(produtoRepository.findById(99)).thenReturn(Optional.empty());
+
+        RecursoNaoEncontradoException exception = assertThrows(
+                RecursoNaoEncontradoException.class,
+                () -> pagamentoService.getCondicoesParcelamento(99)
+        );
+
+        assertEquals("Produto com id 99 não encontrado", exception.getMessage());
+        verifyNoInteractions(precoPromocionalService);
+    }
+
+    private Produto produtoComPreco(String preco, boolean destaque, String desconto) {
+        Produto produto = new Produto();
+        produto.setId(1);
+        produto.setPreco(new BigDecimal(preco));
+        produto.setDestaque(destaque);
+        produto.setDesconto(desconto == null ? null : new BigDecimal(desconto));
+        return produto;
     }
 
     private Pagamento capturarPagamentoCriado(PedidoCreateDTO pedidoCreateDTO) {

@@ -54,6 +54,14 @@ class PagamentoControllerSecurityTest {
         verifyNoInteractions(pagamentoService);
     }
 
+    @Test
+    void deveRetornar401QuandoUsuarioNaoAutenticadoAoConsultarParcelamento() throws Exception {
+        mockMvc.perform(get("/api/v1/pagamentos/produtos/1"))
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(pagamentoService);
+    }
+
     @TestConfiguration
     @EnableWebSecurity
     @EnableMethodSecurity

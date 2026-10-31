@@ -1,5 +1,6 @@
 package guli.gulix.backend.controller;
 
+import guli.gulix.backend.dto.CondicoesPagamentoResponseDTO;
 import guli.gulix.backend.dto.ErrorResponseDTO;
 import guli.gulix.backend.dto.PagamentoResponseDTO;
 import guli.gulix.backend.entity.Usuario;
@@ -32,6 +33,49 @@ import org.springframework.web.bind.annotation.RestController;
 public class PagamentoController {
 
     private final PagamentoService pagamentoService;
+
+    @Operation(
+            summary = "Consultar condições de parcelamento de um produto",
+            description = "Retorna a quantidade máxima de parcelas sem juros e o valor de cada parcela. O valor usa o preço promocional quando o produto está em destaque e o preço original nos demais casos."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Condições de parcelamento retornadas com sucesso"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário não possui permissão para consultar as condições",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Produto não encontrado",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @GetMapping("/produtos/{produtoId}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<CondicoesPagamentoResponseDTO> getCondicoesParcelamento(
+            @Parameter(
+                    description = "Identificador do produto",
+                    example = "1"
+            )
+            @PathVariable Integer produtoId
+    ) {
+        return ResponseEntity.ok(pagamentoService.getCondicoesParcelamento(produtoId));
+    }
 
     @Operation(
             summary = "Consultar pagamento por ID",
