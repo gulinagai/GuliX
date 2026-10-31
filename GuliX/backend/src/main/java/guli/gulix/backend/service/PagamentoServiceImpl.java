@@ -1,9 +1,12 @@
 package guli.gulix.backend.service;
 
+import guli.gulix.backend.config.ParcelamentoConfig;
+import guli.gulix.backend.dto.CondicoesPagamentoResponseDTO;
 import guli.gulix.backend.dto.PagamentoResponseDTO;
 import guli.gulix.backend.dto.PedidoCreateDTO;
 import guli.gulix.backend.entity.Pagamento;
 import guli.gulix.backend.entity.Pedido;
+import guli.gulix.backend.entity.Produto;
 import guli.gulix.backend.entity.Usuario;
 import guli.gulix.backend.entity.enums.GatewayPagamento;
 import guli.gulix.backend.entity.enums.MetodoPagamento;
@@ -15,6 +18,7 @@ import guli.gulix.backend.gateway.pagamento.GatewayPagamentoService;
 import guli.gulix.backend.gateway.pagamento.ResultadoCheckout;
 import guli.gulix.backend.mapper.PagamentoMapper;
 import guli.gulix.backend.repository.PagamentoRepository;
+import guli.gulix.backend.repository.ProdutoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +37,9 @@ public class PagamentoServiceImpl implements PagamentoService {
     private final PagamentoMapper pagamentoMapper;
 
     private final GatewayPagamentoService gatewayPagamentoService;
+    private final ParcelamentoConfig parcelamentoConfig;
+    private final ProdutoRepository produtoRepository;
+    private final PrecoPromocionalService precoPromocionalService;
 
     @Override
     public PagamentoResponseDTO criarPagamento(
@@ -148,12 +155,11 @@ public class PagamentoServiceImpl implements PagamentoService {
 
         validarNumeroParcelas(numeroParcelas);
 
-        // Até 6 parcelas não possuem juros
-        if (numeroParcelas <= 6) {
+        if (numeroParcelas <= parcelamentoConfig.getQuantidadeMaximaParcelasSemJuros()) {
             return BigDecimal.ZERO;
         }
 
-        // De 7 até 48 parcelas possuem 2% de juros
+        // Acima do limite sem juros e até 48 parcelas possuem 2% de juros
         if (numeroParcelas <= 48) {
 
             BigDecimal percentual = PERCENTUAL_JUROS
@@ -174,7 +180,7 @@ public class PagamentoServiceImpl implements PagamentoService {
 
         validarNumeroParcelas(numeroParcelas);
 
-        if (numeroParcelas <= 6) {
+        if (numeroParcelas <= parcelamentoConfig.getQuantidadeMaximaParcelasSemJuros()) {
             return BigDecimal.ZERO;
         }
 
@@ -250,6 +256,22 @@ public class PagamentoServiceImpl implements PagamentoService {
 
         throw new RegraNegocioException(
                 "Método de Pagamento inválido"
+        );
+    }
+
+    @Override
+    public CondicoesPagamentoResponseDTO getCondicoesParcelamento(Integer produtoId) {
+        Produto produto = produtoRepository.findById(produtoId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Produto com id " + produtoId + " não encontrado"
+                ));
+
+        int quantidadeParcelas = parcelamentoConfig.getQuantidadeMaximaParcelasSemJuros();
+        BigDecimal precoEfetivo = precoPromocionalService.precoUnitario(produto);
+
+        return new CondicoesPagamentoResponseDTO(
+                quantidadeParcelas,
+                calculaValorParcela(precoEfetivo, quantidadeParcelas)
         );
     }
 
