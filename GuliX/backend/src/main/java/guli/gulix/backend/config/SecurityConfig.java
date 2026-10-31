@@ -62,6 +62,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/categorias/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/marcas/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/produtos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/pagamentos/produtos/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/imagens/produtos/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/webhooks/stripe").permitAll()
 

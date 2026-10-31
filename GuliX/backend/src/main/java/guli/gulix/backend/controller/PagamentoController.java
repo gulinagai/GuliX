@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -36,26 +37,13 @@ public class PagamentoController {
 
     @Operation(
             summary = "Consultar condições de parcelamento de um produto",
-            description = "Retorna a quantidade máxima de parcelas sem juros e o valor de cada parcela. O valor usa o preço promocional quando o produto está em destaque e o preço original nos demais casos."
+            description = "Retorna a quantidade máxima de parcelas sem juros e o valor de cada parcela. O valor usa o preço promocional quando o produto está em destaque e o preço original nos demais casos. Esta consulta é pública."
     )
+    @SecurityRequirements
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
                     description = "Condições de parcelamento retornadas com sucesso"
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Usuário não autenticado",
-                    content = @Content(
-                            schema = @Schema(implementation = ErrorResponseDTO.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "Usuário não possui permissão para consultar as condições",
-                    content = @Content(
-                            schema = @Schema(implementation = ErrorResponseDTO.class)
-                    )
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -66,7 +54,6 @@ public class PagamentoController {
             )
     })
     @GetMapping("/produtos/{produtoId}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<CondicoesPagamentoResponseDTO> getCondicoesParcelamento(
             @Parameter(
                     description = "Identificador do produto",
